@@ -7,6 +7,7 @@
 
 (defparameter +width+ 600)
 (defparameter +height+ 600)
+(defparameter +sweat-pos+ '((450 150) (100 200) (300 100) (400 400)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GLOBAL STATES
@@ -14,6 +15,12 @@
 (defvar *scene*)
 (defvar *modal*)
 (defvar *level*)
+(defvar *assets-path* (asdf:system-relative-pathname :blink #p"assets/"))
+(defvar *head-texture*)
+(defvar *enemies-texture*)
+(defvar *sweat-texture*)
+(defvar *squint-animation*)
+(defvar *idle-animation*)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CONDITIONS
@@ -33,6 +40,41 @@
   (:method (thing)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; ANIMATION
+
+;; loop?
+;; spec: frame cond, texture, src rec, target rec
+
+(defclass animation ()
+  ((timer :initform 0 :accessor timer)
+   (loop-at :initform nil :initarg :loop-at :accessor loop-at)
+   (texture :initarg :texture :accessor texture)
+   (target :initarg :target :accessor target)
+   (spec :initarg :spec :accessor spec)))
+
+(defmethod update ((this animation) dt)
+  (incf (timer this) dt)
+  (when (and (loop-at this)
+             (< (loop-at this) (timer this)))
+    (setf (timer this) 0)))
+
+(defmethod draw ((this animation))
+  (loop :named spec-loop
+        :for (timer-min timer-max src-rec) :in (spec this)
+        :when (and (<= timer-min (timer this))
+                   (or (null timer-max)
+                       (< (timer this) timer-max)))
+          :do (r:draw-texture-pro (texture this) ; *head-texture*
+                                  src-rec
+                                  (target this)
+                                  (r:make-vector2 :x 0.0 :y 0.0)
+                                  0.0
+                                  r:+white+)))
+
+(defun reset (animation)
+  (setf (timer animation) 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ENTITIES
 
 (defclass bug ()
@@ -40,7 +82,28 @@
    (y :initarg :y :accessor y)
    (v :initarg :v :accessor v)
    (u :initarg :u :accessor u)
-   (alive-p :initform t :accessor alive-p)))
+   (sprite-id :initform (r:get-random-value 0 11) :accessor sprite-id)
+   (alive-p :initform t :accessor alive-p)
+   (animation :initarg :animation :accessor animation)))
+
+(defmethod initialize-instance :after ((this bug) &key)
+  (setf (animation this)
+        (make-instance 'animation
+                       :texture *enemies-texture*
+                       :spec `((0 0.5
+                                ,(r:make-rectangle :x 0
+                                                     :y (* 16 (sprite-id this))
+                                                     :width 16 :height 16))
+                               (0.5 1
+                                ,(r:make-rectangle :x 16
+                                                   :y (* 16 (sprite-id this))
+                                                   :width 16 :height 16)))
+                       :target (r:make-rectangle :x (x this)
+                                                 :y (y this)
+                                                 :width 100
+                                                 :height 100)
+                       :loop-at 1)))
+                       
 
 (defun spawn-bug ()
   (let ((theta (float (r:get-random-value 0 360) pi)))
@@ -53,7 +116,25 @@
 (defun die (bug)
   (setf (alive-p bug) nil
         (v bug) 0
-        (u bug) 0))
+        (u bug) 0
+
+        (animation bug)
+        (make-instance 'animation
+                       :texture *sweat-texture*
+                       :spec `((0 0.6
+                                  ,(r:make-rectangle :x 0 :y 0
+                                                     :width 16 :height 32))
+                               (0.6 0.8
+                                    ,(r:make-rectangle :x 16 :y 0
+                                                       :width 16 :height 32))
+                               (0.8 1.0
+                                    ,(r:make-rectangle :x 32 :y 0
+                                                       :width 16 :height 32)))
+                       :target (r:make-rectangle :x (x bug)
+                                                 :y (y bug)
+                                                 :width 100
+                                                 :height 200)
+                       :loop-at 1.0)))
 
 (defmethod update ((obj bug) dt)
   (with-slots (x y v u) obj
@@ -63,11 +144,45 @@
       ((< x 0) (setf x 0 v (* -1 v)))
       ((< +width+ x) (setf x +width+ v (* -1 v)))
       ((< y 0) (setf y 0 u (* -1 u)))
-      ((< +height+ y) (setf y +height+ u (* -1 u))))))
+      ((< +height+ y) (setf y +height+ u (* -1 u)))))
+
+  (update (animation obj) dt)
+  (setf (r:rectangle-x (target (animation obj))) (- (round (x obj)) 50)
+        (r:rectangle-y (target (animation obj))) (- (round (y obj)) 50)))
 
 (defmethod draw ((obj bug))
-  (with-slots (x y) obj
-    (r:draw-circle (round x) (round y) 5.0 r:+red+)))
+  ;; (with-slots (x y) obj
+  ;;   (r:draw-circle (round x) (round y) 5.0 r:+red+))
+  (draw (animation obj)))
+
+(defclass sweat ()
+  ((x :initarg :x :accessor x)
+   (y :initarg :y :accessor y)
+   (animation :initarg :animation :accessor animation)))
+
+(defmethod initialize-instance :after ((this sweat) &key)
+  (setf (animation this)
+        (make-instance 'animation
+                       :texture *sweat-texture*
+                       :spec `((0 0.5
+                                ,(r:make-rectangle :x 0 :y 0
+                                                   :width 16 :height 32))
+                               (0.5 1
+                                ,(r:make-rectangle :x 16 :y 0
+                                                   :width 16 :height 32)))
+                       :target (r:make-rectangle :x (x this)
+                                                 :y (y this)
+                                                 :width 100
+                                                 :height 200)
+                       :loop-at 1)))
+
+(defmethod update ((obj sweat) dt)
+  (update (animation obj) dt)
+  (setf (r:rectangle-x (target (animation obj))) (- (round (x obj)) 50)
+        (r:rectangle-y (target (animation obj))) (- (round (y obj)) 50)))
+
+(defmethod draw ((obj sweat))
+  (draw (animation obj)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SCENES
@@ -245,60 +360,70 @@
 
 (defclass arena-scene (scene)
   ((eyelids :initform 0.0 :accessor eyelids)
+   (state :initform :idle :accessor state)
    (level :initform *level* :accessor level)
    (bugs :initform (make-hash-table) :accessor bugs)
+   (sweats :initform (make-hash-table) :accessor sweats)
    (timer :initform 5 :accessor timer)
    (meter :initform 0 :accessor meter)
    (hp :initform 3 :accessor hp)
-   (squint-p :initform nil :accessor squint-p)
-   (cooldown-p :initform nil :accessor cooldown-p)))
+   (animation :initform *idle-animation* :accessor animation)))
 
 (defmethod initialize-instance :after ((obj arena-scene) &key)
   (dotimes (n (level obj))
     (setf (gethash n (bugs obj)) (spawn-bug))))
 
 (defmethod update ((this arena-scene) dt)
-  (let ((squint-p (r:is-key-down r:+key-z+)))
-    (cond
-      ;; done cooling down
-      ((and (cooldown-p this)
-            (zerop (meter this)))
-       (setf (cooldown-p this) nil))
-      ;; keep cooling down
-      ((cooldown-p this) nil)
-      ;; need to cool down after 1 second
-      ;; ((<= 1 (meter this)) (setf (cooldown-p this) t (squint-p this) nil))
-      ;; squinting hard
-      (squint-p (setf (squint-p this) t (cooldown-p this) nil))
-      ;; relaxing
-      (t (setf (squint-p this) nil (cooldown-p this) nil)
-         (loop :for bug-id :being :the :hash-key
-                 :using (hash-value bug)
-                   :of (bugs this)
-               :when (alive-p bug)
-               :do (when (or (r:check-collision-circles
-                              (r:make-vector2 :x (round (x bug)) :y (round (y bug)))
-                              5.0
-                              (r:make-vector2 :x 200 :y 280)
-                              80.0)
-                             (r:check-collision-circles
-                              (r:make-vector2 :x (round (x bug)) :y (round (y bug)))
-                              5.0
-                              (r:make-vector2 :x 400 :y 280)
-                              80.0))
-                     (die bug)
-                     (decf (hp this)))))))
+  (let ((action-p (r:is-key-down r:+key-z+)))
+    (case (state this)
+      (:idle (if action-p
+                 (setf (state this) :squint
+                       (animation this) *squint-animation*
+                       (timer *squint-animation*) 0)
+                 (setf (state this) :idle)))
+      (:squint (if action-p
+                   (setf (state this) :squint)
+                   (setf (state this) :idle
+                         (animation this) *idle-animation*
+                         (timer *idle-animation*) 0)))))
+
+  (update (animation this) dt)
+
+  (unless (eql :squint (state this))
+    (loop :for bug-id :being :the :hash-key
+            :using (hash-value bug)
+              :of (bugs this)
+          :when (alive-p bug)
+            :do (when (or
+                       (r:check-collision-circles
+                        (r:make-vector2 :x (round (x bug)) :y (round (y bug)))
+                        5.0
+                        (r:make-vector2 :x 200 :y 280)
+                        80.0)
+                       (r:check-collision-circles
+                        (r:make-vector2 :x (round (x bug)) :y (round (y bug)))
+                        5.0
+                        (r:make-vector2 :x 400 :y 280)
+                        80.0))
+                  (remhash bug-id (bugs this))
+                  (let* ((spawn-idx (hash-table-count (sweats this)))
+                         (spawn-pos (nth spawn-idx +sweat-pos+)))
+                    (setf (gethash bug-id (sweats this))
+                          (make-instance 'sweat
+                                         :x (car spawn-pos)
+                                         :y (cadr spawn-pos))))
+                  (decf (hp this)))))
 
   (when (< (hp this) 0)
     (game-over-sequence))
   (decf (timer this) dt)
 
-  (with-slots (meter squint-p cooldown-p) this
-    (cond
-      (squint-p (setf (eyelids this) (min 1.0 (+ (eyelids this) (* 5 dt)))
-                      meter (min 1.0 (+ meter dt))))
-      (t (setf (eyelids this) (max 0.0 (- (eyelids this) (* 5 dt)))
-               meter (max 0 (- meter (* 1.0 dt)))))))
+  (with-slots (meter state) this
+    (case state
+      (:squint (setf (eyelids this) (min 1.0 (+ (eyelids this) (* 5 dt)))
+                     meter (min 1.0 (+ meter dt))))
+      (:idle (setf (eyelids this) (max 0.0 (- (eyelids this) (* 5 dt)))
+                   meter (max 0 (- meter (* 1.0 dt)))))))
 
   (when (< (timer this) 0)
     (incf *level*)
@@ -306,59 +431,41 @@
     (return-from update))
 
   (loop :for bug :being :the :hash-value :of (bugs this)
-        :do (update bug dt)))
+        :do (update bug dt))
+
+  (loop :for sweat :being :the :hash-value :of (sweats this)
+        :do (update sweat dt)))
 
 (defmethod draw ((this arena-scene))
-  ;; face
-  (r:draw-circle 300 300 220.0 r:+yellow+)
-  ;; mouse
-  (r:draw-line-bezier-quad (r:make-vector2 :x 200.0 :y 380.0)
-                           (r:make-vector2 :x 400.0 :y 380.0)
-                           (r:make-vector2 :x 300.0 :y 450.0)
-                           10.0 r:+black+)
-  ;; eye bags
-  (when (< (hp this) 3)
-    (r:draw-circle 200 280 90.0 r:+black+)
-    (r:draw-circle 400 280 90.0 r:+black+))
-
+  (draw (animation this))
   ;; eyeballs
-  (r:draw-circle 200 280 80.0 r:+raywhite+)
-  (r:draw-circle 400 280 80.0 r:+raywhite+)
-
-  (when (< (hp this) 2)
-    (r:draw-circle 200 280 80.0 r:+pink+)
-    (r:draw-circle 400 280 80.0 r:+pink+))
-
-  (when (< (hp this) 1)
-    (r:draw-circle 200 280 50.0 r:+red+)
-    (r:draw-circle 400 280 50.0 r:+red+))
-
+  ;; (r:draw-circle 200 280 80.0 r:+raywhite+)
+  ;; (r:draw-circle 400 280 80.0 r:+raywhite+)
   ;; pupils
-  (r:draw-circle 200 280 30.0 r:+black+)
-  (r:draw-circle 400 280 30.0 r:+black+)
+  ;; (r:draw-circle 200 280 30.0 r:+black+)
+  ;; (r:draw-circle 400 280 30.0 r:+black+)
   ;; eyelids
-  (r:draw-rectangle 110 190 380 (round (* (eyelids this) 80)) r:+yellow+)
-  (r:draw-rectangle 110 (- 380 (round (* (eyelids this) 80))) 380
-                    (round (* (eyelids this) 80)) r:+yellow+)
-  (when (< (hp this) 3)
-    (r:draw-rectangle 120 (+ 190 (round (* (eyelids this) 80)))
-                      170 20 r:+black+)
-    (r:draw-rectangle 320 (+ 190 (round (* (eyelids this) 80)))
-                      170 20 r:+black+))
+  ;; (r:draw-rectangle 110 190 380 (round (* (eyelids this) 80)) r:+yellow+)
+  ;; (r:draw-rectangle 110 (- 380 (round (* (eyelids this) 80))) 380
+  ;;                   (round (* (eyelids this) 80)) r:+yellow+)
 
   ;; Bugs
   (loop :for k :being :the :hash-key :using (hash-value bug) :of (bugs this)
         :do (draw bug))
 
+  ;; Sweats
+  (loop :for sweat :being :the :hash-value :of (sweats this)
+        :do (draw sweat))
+
   ;; Overlay
-  (r:draw-rectangle 0 0 +width+ (round (* (eyelids this) 240))
+  (r:draw-rectangle 0 0 +width+ (round (* (eyelids this) 200))
                     r:+black+)
-  (r:draw-rectangle 0 (- 600 (round (* (eyelids this) 280)))
-                    +width+ (round (* (eyelids this) 280))
+  (r:draw-rectangle 0 (- 600 (round (* (eyelids this) 220)))
+                    +width+ (round (* (eyelids this) 220))
                     r:+black+)
 
-  (r:draw-rectangle 0 0 +width+ +height+
-                    (list 0 0 0 (round (* 200 (eyelids this)))))
+  ;; (r:draw-rectangle 0 0 +width+ +height+
+  ;;                   (list 0 0 0 (round (* 200 (eyelids this)))))
 
   ;; Heads-up-display
   (r:draw-rectangle 10 10
@@ -383,14 +490,51 @@
 
 (defun init-game ()
   "Set game state"
-  (setf *scene* (make-instance 'title-scene))
+  (setf *scene* (make-instance 'menu-scene))
   (setf *modal* nil)
-  (setf *level* 1))
+  (setf *level* 1)
+  (setf *head-texture*
+        (r:load-texture
+         (namestring (merge-pathnames "head.png" *assets-path*))))
+  (setf *enemies-texture*
+        (r:load-texture
+         (namestring (merge-pathnames "enemies.png" *assets-path*))))
+  (setf *sweat-texture*
+        (r:load-texture
+         (namestring (merge-pathnames "sweat.png" *assets-path*))))
+  (setf *idle-animation*
+        (make-instance 'animation
+                       :texture *head-texture*
+                       :spec `((0 0.5
+                                ,(r:make-rectangle :x 0 :y 0
+                                                  :width 64 :height 64))
+                               (0.5 1
+                                ,(r:make-rectangle :x 0 :y 0
+                                                  :width 64 :height 64)))
+                       :target (r:make-rectangle :x 100 :y 100
+                                                 :width 400 :height 400)
+                       :loop-at 1))
+  (setf *squint-animation*
+        (make-instance 'animation
+                       :texture *head-texture*
+                       :spec `((0 0.1
+                                ,(r:make-rectangle :x 0 :y 0
+                                                  :width 64 :height 64))
+                               (0.1 0.2
+                                ,(r:make-rectangle :x 64 :y 0
+                                                  :width 64 :height 64))
+                               (0.2 nil
+                                ,(r:make-rectangle :x 128 :y 0
+                                                  :width 64 :height 64)))
+                       :target (r:make-rectangle :x 100 :y 100
+                                                 :width 400 :height 400))))
 
 (defun unload-game ()
   (setf *scene* nil)
   (setf *modal* nil)
-  (setf *level* nil))
+  (setf *level* nil)
+  (setf *head-texture* nil)
+  (setf *enemies-texture* nil))
 
 (defun main ()
   (r:with-window (+width+ +height+ "Blink")
@@ -404,3 +548,5 @@
         (declare (ignore c))
         (format t "Game Over!~&")))
     (unload-game)))
+
+;; (main)
