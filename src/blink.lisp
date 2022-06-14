@@ -365,7 +365,6 @@
    (bugs :initform (make-hash-table) :accessor bugs)
    (sweats :initform (make-hash-table) :accessor sweats)
    (timer :initform 5 :accessor timer)
-   (meter :initform 0 :accessor meter)
    (hp :initform 3 :accessor hp)
    (animation :initform *idle-animation* :accessor animation)))
 
@@ -418,12 +417,9 @@
     (game-over-sequence))
   (decf (timer this) dt)
 
-  (with-slots (meter state) this
-    (case state
-      (:squint (setf (eyelids this) (min 1.0 (+ (eyelids this) (* 5 dt)))
-                     meter (min 1.0 (+ meter dt))))
-      (:idle (setf (eyelids this) (max 0.0 (- (eyelids this) (* 5 dt)))
-                   meter (max 0 (- meter (* 1.0 dt)))))))
+  (case (state this)
+    (:squint (setf (eyelids this) (min 1.0 (+ (eyelids this) (* 5 dt)))))
+    (:idle (setf (eyelids this) (max 0.0 (- (eyelids this) (* 5 dt))))))
 
   (when (< (timer this) 0)
     (incf *level*)
@@ -470,10 +466,7 @@
   ;; Heads-up-display
   (r:draw-rectangle 10 10
                     (round (* (timer this) 1/5 (- +width+ 20)))
-                    10 r:+red+)
-  (r:draw-rectangle 10 580
-                    (round (* (meter this) (- +width+ 20)))
-                    10 r:+blue+))
+                    10 '(208 70 72 255)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Game
