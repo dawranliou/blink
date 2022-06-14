@@ -7,7 +7,7 @@
 
 (defparameter +width+ 600)
 (defparameter +height+ 600)
-(defparameter +sweat-pos+ '((450 150) (100 200) (300 100) (400 400)))
+(defparameter +sweat-pos+ '((450 150) (100 200) (400 400) (400 400)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GLOBAL STATES
@@ -406,7 +406,7 @@
                         80.0))
                   (remhash bug-id (bugs this))
                   (let* ((spawn-idx (hash-table-count (sweats this)))
-                         (spawn-pos (nth spawn-idx +sweat-pos+)))
+                         (spawn-pos (nth (mod spawn-idx 4) +sweat-pos+)))
                     (setf (gethash bug-id (sweats this))
                           (make-instance 'sweat
                                          :x (car spawn-pos)
