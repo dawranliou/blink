@@ -373,22 +373,23 @@
     (setf (gethash n (bugs obj)) (spawn-bug))))
 
 (defmethod update ((this arena-scene) dt)
-  (let ((action-p (r:is-key-down r:+key-z+)))
-    (case (state this)
-      (:idle (if action-p
-                 (setf (state this) :squint
-                       (animation this) *squint-animation*
-                       (timer *squint-animation*) 0)
-                 (setf (state this) :idle)))
-      (:squint (if action-p
-                   (setf (state this) :squint)
-                   (setf (state this) :idle
-                         (animation this) *idle-animation*
-                         (timer *idle-animation*) 0)))))
+  ;; State transition
+  (case (state this)
+    (:idle (cond
+             ((r:is-key-down r:+key-z+) (setf (state this) :squint
+                                              (animation this) *squint-animation*
+                                              (timer *squint-animation*) 0))
+             ((< (hp this) 0) (setf (state this) :game-over))
+             (t (setf (state this) :idle))))
+    (:squint (cond
+               ((r:is-key-down r:+key-z+) (setf (state this) :squint))
+               (t (setf (state this) :idle
+                        (animation this) *idle-animation*
+                        (timer *idle-animation*) 0))))
+    (:game-over (setf (state this) :game-over)))
 
-  (update (animation this) dt)
-
-  (unless (eql :squint (state this))
+  ;; Collision detection
+  (when (eql :idle (state this))
     (loop :for bug-id :being :the :hash-key
             :using (hash-value bug)
               :of (bugs this)
@@ -421,10 +422,15 @@
     (:squint (setf (eyelids this) (min 1.0 (+ (eyelids this) (* 5 dt)))))
     (:idle (setf (eyelids this) (max 0.0 (- (eyelids this) (* 5 dt))))))
 
+  (when (eql :idle (state this))
+    (decf (timer this) dt))
+
   (when (< (timer this) 0)
     (incf *level*)
     (setf *scene* (make-instance 'level-scene))
     (return-from update))
+
+  (update (animation this) dt)
 
   (loop :for bug :being :the :hash-value :of (bugs this)
         :do (update bug dt))
@@ -483,7 +489,8 @@
 
 (defun init-game ()
   "Set game state"
-  (setf *scene* (make-instance 'menu-scene))
+  (setf *scene* (make-instance 'title-scene))
+  ;; (setf *scene* (make-instance 'menu-scene))
   (setf *modal* nil)
   (setf *level* 1)
   (setf *head-texture*
