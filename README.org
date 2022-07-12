@@ -1,0 +1,14 @@
+* blink
+
+A 2D game in Common Lisp powered by [[https://www.raylib.com/][raylib]].
+
+** Install
+
+1. Install [[https://github.com/longlene/cl-raylib][cl-raylib]] via its instruction.
+2. Clone this repo
+3. Load system =#:blink=
+4. Run =(blink:main)=
+
+** License
+
+MIT
