@@ -1,7 +1,10 @@
 (in-package #:blink)
 
+(defclass tile (entity) ())
+
 (defun add-background-game-object (id x y)
   (make-entity
+   'tile
    (list (make-box-component x y
                              +sprite-size+
                              +sprite-size+
@@ -24,3 +27,4 @@
                  do (add-background-game-object id x y))))
 
 ;; (load-room *room*)
+;; (destroy-entities)

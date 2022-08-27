@@ -8,8 +8,8 @@
   ((id :accessor entity-id :initform (incf *entity-id-counter*))
    (components :accessor entity-components :initarg :components)))
 
-(defun make-entity (components)
-  (let ((entity (make-instance 'entity :components components)))
+(defun make-entity (entity-sym components)
+  (let ((entity (make-instance entity-sym :components components)))
     (setf (gethash (entity-id entity) *entity-index*) entity)
     entity))
 

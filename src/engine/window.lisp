@@ -6,21 +6,17 @@
    (scene :accessor scene)))
 
 (defmethod kit.sdl2:initialize-window progn
-    ((window game-window) &key &allow-other-keys)
+    ((window game-window) &key init-scene &allow-other-keys)
   (sdl2-ttf:init)
   (setf (kit.sdl2:idle-render window) t)
   (sdl2:set-hint :render-scale-quality nil)
-  (with-slots (renderer kit.sdl2:sdl-window) window
+  (with-slots (renderer scene kit.sdl2:sdl-window) window
     (setf renderer (sdl2:create-renderer kit.sdl2:sdl-window
                                          nil
                                          '(:accelerated
                                            :presentvsync)))
-    (setf *bg-tex* (load-texture-from-file
-                    renderer
-                    (relative-path #P"assets/bg.png")))
-    (setf *player-tex* (load-texture-from-file
-                        renderer
-                        (relative-path #P"assets/player.png")))))
+    (setf scene init-scene)
+    (set-scene scene :renderer renderer)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
   (destroy-entities)
@@ -55,6 +51,11 @@
 (defmethod kit.sdl2:textinput-event :after ((window game-window) ts text)
   (when (string= "Q" (string-upcase text))
     (kit.sdl2:close-window window)))
+
+(defmethod kit.sdl2:keyboard-event ((window game-window) state ts repeat-p keysym)
+  (with-slots (scene) window
+    (let ((scancode (sdl2:scancode keysym)))
+      (update scene nil :key scancode :state state :repeat-p repeat-p))))
 
 (defmethod kit.sdl2:keyboard-event :after
     ((window game-window) state ts repeat-p keysym)
