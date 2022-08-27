@@ -16,8 +16,19 @@
                    #+darwin "osx-app-deploy-op"
   :build-pathname "blink"
   :entry-point "blink:main"
-  :depends-on (#:cl-raylib)
+  :depends-on (#:sdl2kit #:sdl2-image #:sdl2-ttf #:glkit #:mathkit #:cl-raylib)
   :serial t
   :pathname "src"
   :components ((:file "package")
-               (:file "blink")))
+               (:file "blink")
+               (:module "engine"
+                :components ((:file "color")
+                             (:file "resource")
+                             (:file "texture")
+                             (:file "font")
+                             (:file "scene")
+                             (:file "entity")
+                             (:file "room")
+                             (:file "player")
+                             (:file "window")))
+               (:file "main")))
