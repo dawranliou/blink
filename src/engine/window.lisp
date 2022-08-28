@@ -3,7 +3,8 @@
 (defclass game-window (kit.sdl2:window)
   ((renderer :initform nil :reader renderer)
    (frames :initform 0)
-   (scene :accessor scene)))
+   (scene :accessor scene)
+   (keys :accessor keys :initform (make-hash-table :test 'equal))))
 
 (defmethod kit.sdl2:initialize-window progn
     ((window game-window) &key init-scene &allow-other-keys)
@@ -35,9 +36,10 @@
   '(:shown))
 
 (defmethod kit.sdl2:render :before ((window game-window))
-  (with-slots (renderer) window
+  (with-slots (renderer scene keys) window
     (sdl2:set-render-draw-color renderer 0 0 0 255)
-    (sdl2:render-clear renderer)))
+    (sdl2:render-clear renderer)
+    (update scene :keys keys)))
 
 (defmethod kit.sdl2:render ((window game-window))
   (with-slots (frames renderer) window
@@ -53,9 +55,13 @@
     (kit.sdl2:close-window window)))
 
 (defmethod kit.sdl2:keyboard-event ((window game-window) state ts repeat-p keysym)
-  (with-slots (scene) window
+  (with-slots (scene keys) window
     (let ((scancode (sdl2:scancode keysym)))
-      (update scene nil :key scancode :state state :repeat-p repeat-p))))
+      (unless repeat-p
+        ;; (format t "~A ~S ~S~%" state scancode (sdl2:scancode-name scancode))
+        (case state
+          (:keyup (setf (gethash (sdl2:scancode-name scancode) keys) nil))
+          (:keydown (setf (gethash (sdl2:scancode-name scancode) keys) t)))))))
 
 (defmethod kit.sdl2:keyboard-event :after
     ((window game-window) state ts repeat-p keysym)

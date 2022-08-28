@@ -55,14 +55,19 @@
   (setf *player-tex* nil)
   (setf *bg-tex* nil))
 
-(defmethod update ((level-scene level-scene) dt &key key state)
-  (when (eq state :keydown)
-    (case key
-      (:scancode-right (player-move *player* :x +5))
-      (:scancode-left (player-move *player* :x -5))
-      (:scancode-up (player-move *player* :y -5))
-      (:scancode-down (player-move *player* :y +5))
-      (otherwise nil))))
+(defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
+  (with-slots (dt) level-scene
+    (when (gethash "Right" keys)
+      (player-move *player* :x +5))
+
+    (when (gethash "Left" keys)
+      (player-move *player* :x -5))
+
+    (when (gethash "Up" keys)
+      (player-move *player* :y -5))
+
+    (when (gethash "Down" keys)
+      (player-move *player* :y +5))))
 
 (defun run (&key (w +width+) (h +height+))
   (kit.sdl2:init)
@@ -75,6 +80,6 @@
   *window*)
 
 ;; (run)
-;; (destroy-entities)
 ;; (load-room *room*)
 ;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
+;; (destroy-entities)
