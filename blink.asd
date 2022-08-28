@@ -25,6 +25,7 @@
                              (:file "resource")
                              (:file "texture")
                              (:file "font")
+                             (:file "camera")
                              (:file "scene")
                              (:file "entity")
                              (:file "room")

@@ -11,7 +11,16 @@
 
 (defclass scene ()
   ((last-tick-time :accessor last-tick-time :initform (sdl2:get-ticks))
-   (dt :accessor dt :initform 0)))
+   (dt :accessor dt :initform 0)
+   (camera :accessor camera :initform (make-instance 'camera))))
+
+(defun set-scene-camera (scene &key x y)
+  (when (or x y)
+    (set-camera (camera scene) :x x :y y)))
+
+(defun move-scene-camera (scene &key dx dy)
+  (when (or dx dy)
+    (move-camera (camera scene) :dx dx :dy dy)))
 
 (defgeneric init (scene &key &allow-other-keys))
 

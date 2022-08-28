@@ -58,16 +58,20 @@
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt) level-scene
     (when (gethash "Right" keys)
-      (player-move *player* :x +5))
+      (player-move *player* :x (* dt +0.5)))
 
     (when (gethash "Left" keys)
-      (player-move *player* :x -5))
+      (player-move *player* :x (* dt -0.5)))
 
     (when (gethash "Up" keys)
-      (player-move *player* :y -5))
+      (player-move *player* :y (* dt -0.5)))
 
     (when (gethash "Down" keys)
-      (player-move *player* :y +5))))
+      (player-move *player* :y (* dt +0.5)))))
+
+(defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
+  (destructuring-bind (x y) (player-pos *player*)
+    (set-scene-camera level-scene :x (- x (/ +width+ 2)) :y (- y (/ +height+ 2)))))
 
 (defun run (&key (w +width+) (h +height+))
   (kit.sdl2:init)
@@ -83,3 +87,4 @@
 ;; (load-room *room*)
 ;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
 ;; (destroy-entities)
+;; (setf (kit.sdl2:render-enabled *window*) t)

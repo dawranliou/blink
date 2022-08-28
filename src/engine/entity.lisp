@@ -21,12 +21,12 @@
 
 (defclass component () ())
 
-(defgeneric render-component (renderer this))
+(defgeneric render-component (renderer this &key &allow-other-keys))
 
-(defun run-render-system (renderer)
+(defun run-render-system (renderer camera)
   (loop :for entity :being :the :hash-values :of *entity-index*
         :do (loop :for component :in (entity-components entity)
-                  :do (render-component renderer component))))
+                  :do (render-component renderer component :camera camera))))
 
 ;; concrete components
 
@@ -37,11 +37,12 @@
    (h :accessor h :initarg :h)
    (color :accessor color :initarg :color :initform +white+)))
 
-(defmethod render-component (renderer (box box))
-  (when *debug*
-    (with-slots (x y w h color) box
-      (apply #'sdl2:set-render-draw-color renderer color)
-      (sdl2:render-draw-rect renderer (sdl2:make-rect x y w h)))))
+(defmethod render-component (renderer (box box) &key camera)
+  (with-slots (x y w h color) box
+    (apply #'sdl2:set-render-draw-color renderer color)
+    (sdl2:render-draw-rect renderer (sdl2:make-rect (- x (x camera))
+                                                    (- y (y camera))
+                                                    w h))))
 
 (defun make-box-component (x y w h &optional (color +white+))
   (make-instance 'box :x x :y y :w w :h h :color color))
@@ -55,15 +56,22 @@
    (h :accessor h :initarg :h)
    (tint :accessor tint :initarg :tint :initform nil)))
 
-(defmethod render-component (renderer (sprite sprite))
+(defmethod render-component (renderer (sprite sprite) &key camera)
   (with-slots (tex rect x y w h tint) sprite
+    (when *debug*
+      (with-slots (x y w h tint) sprite
+        (apply #'sdl2:set-render-draw-color renderer tint)
+        (sdl2:render-draw-rect renderer (sdl2:make-rect x y w h))))
     (when tint
-      (destructuring-bind (r g b a) tint
+      (destructuring-bind (r g b _a) tint
+        (declare (ignore _a))
         (sdl2:set-texture-color-mod (texture tex) r g b)))
     (sdl2:render-copy renderer
                       (texture tex)
                       :source-rect rect
-                      :dest-rect (sdl2:make-rect x y w h))))
+                      :dest-rect (sdl2:make-rect (- x (x camera))
+                                                 (- y (y camera))
+                                                 w h))))
 
 (defun make-sprite-component (tex rect x y w h &key tint)
   (make-instance 'sprite :tex tex :rect rect :x x :y y :w w :h h :tint tint))

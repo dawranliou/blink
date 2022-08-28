@@ -5,16 +5,13 @@
 (defun add-background-game-object (id x y)
   (make-entity
    'tile
-   (list (make-box-component x y
-                             +sprite-size+
-                             +sprite-size+
-                             +gray-50+)
-         (make-sprite-component *bg-tex*
-                                (sdl2:make-rect (* id 16) 0 16 16)
-                                x y
-                                +sprite-size+
-                                +sprite-size+
-                                :tint +gray-50+))))
+   (list
+    (make-sprite-component *bg-tex*
+                           (sdl2:make-rect (* id 16) 0 16 16)
+                           x y
+                           +sprite-size+
+                           +sprite-size+
+                           :tint +gray-50+))))
 
 ;; (add-background-game-object 2 64 64)
 

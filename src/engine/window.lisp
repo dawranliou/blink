@@ -42,9 +42,9 @@
     (update scene :keys keys)))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (with-slots (frames renderer) window
+  (with-slots (frames renderer scene) window
     ;; (text renderer "Hello" 10 10)
-    (run-render-system renderer)))
+    (run-render-system renderer (camera scene))))
 
 (defmethod kit.sdl2:render :after ((window game-window))
   (with-slots (renderer) window
