@@ -20,7 +20,6 @@
   :serial t
   :pathname "src"
   :components ((:file "package")
-               (:file "blink")
                (:module "engine"
                 :components ((:file "color")
                              (:file "resource")
