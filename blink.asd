@@ -28,7 +28,7 @@
                              (:file "camera")
                              (:file "scene")
                              (:file "entity")
-                             (:file "room")
+                             (:file "tile")
                              (:file "player")
                              (:file "window")))
                (:file "main")))
