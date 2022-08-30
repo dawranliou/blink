@@ -18,7 +18,7 @@
 (defparameter *room*
   '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
     (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
@@ -45,11 +45,13 @@
   (setf *bg-tex* (load-texture-from-file
                   renderer
                   (relative-path #P"assets/bg.png")))
+  (add-room-to-scene level-scene *room*)
+
   (setf *player-tex* (load-texture-from-file
                       renderer
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
-  (load-room *room*))
+  (add-to-scene level-scene *player*))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)
   (setf *player-tex* nil)
@@ -86,5 +88,5 @@
 ;; (run)
 ;; (load-room *room*)
 ;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
-;; (destroy-entities)
+;; (remove-all-entities-from-scene (scene *window*))
 ;; (setf (kit.sdl2:render-enabled *window*) t)

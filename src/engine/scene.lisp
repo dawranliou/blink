@@ -11,8 +11,15 @@
 
 (defclass scene ()
   ((last-tick-time :accessor last-tick-time :initform (sdl2:get-ticks))
+   (entities :accessor entities :initform '())
    (dt :accessor dt :initform 0)
    (camera :accessor camera :initform (make-instance 'camera))))
+
+(defun add-to-scene (scene entity)
+  (push entity (entities scene)))
+
+(defun remove-all-entities-from-scene (scene)
+  (setf (entities scene) nil))
 
 (defun set-scene-camera (scene &key x y)
   (when (or x y)
@@ -35,10 +42,6 @@
     (let ((current-tick-time (sdl2:get-ticks)))
       (setf dt (- current-tick-time last-tick-time))
       (setf last-tick-time current-tick-time))))
-
-(defgeneric render (scene &key &allow-other-keys))
-
-(defmethod render (obj &key &allow-other-keys))
 
 (defgeneric unload (scene &key &allow-other-keys))
 

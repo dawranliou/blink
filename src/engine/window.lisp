@@ -20,7 +20,7 @@
     (set-scene scene :renderer renderer)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
-  (destroy-entities)
+  (remove-all-entities-from-scene (scene window))
   (with-slots (renderer) window
     (when (and (slot-boundp window 'renderer) renderer)
       (sdl2:destroy-renderer renderer)))
@@ -44,7 +44,7 @@
 (defmethod kit.sdl2:render ((window game-window))
   (with-slots (frames renderer scene) window
     ;; (text renderer "Hello" 10 10)
-    (run-render-system renderer (camera scene))))
+    (run-render-system renderer (entities scene) (camera scene))))
 
 (defmethod kit.sdl2:render :after ((window game-window))
   (with-slots (renderer) window
