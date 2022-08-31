@@ -72,7 +72,7 @@
       (player-move *player* :y (* dt +0.5)))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
-  (destructuring-bind (x y) (player-pos *player*)
+  (with-slots (x y) *player*
     (set-scene-camera level-scene :x (- x (/ +width+ 2)) :y (- y (/ +height+ 2)))))
 
 (defun run (&key (w +width+) (h +height+))

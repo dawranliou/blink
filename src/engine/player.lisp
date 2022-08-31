@@ -13,6 +13,3 @@
 (defun player-move (player &key (x 0) (y 0))
   (incf (x player) (floor x))
   (incf (y player) (floor y)))
-
-(defun player-pos (player)
-  (list (x player) (y player)))
