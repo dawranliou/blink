@@ -12,8 +12,8 @@
 
 ;; (make-tile 2 64 64)
 
-(defun add-room-to-scene (scene room-data)
-  (loop for row in room-data
+(defun add-tiles-to-scene (scene tiles)
+  (loop for row in tiles
         for y = 0 then (incf y +sprite-size+)
         do (loop for tile-id in row
                  for x = 0 then (incf x +sprite-size+)

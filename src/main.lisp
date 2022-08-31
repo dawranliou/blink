@@ -15,7 +15,7 @@
 ;; (defparameter *window* nil)
 ;; (defparameter *scene-views* '())
 
-(defparameter *room*
+(defparameter *tiles*
   '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
     (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
@@ -45,7 +45,7 @@
   (setf *bg-tex* (load-texture-from-file
                   renderer
                   (relative-path #P"assets/bg.png")))
-  (add-room-to-scene level-scene *room*)
+  (add-tiles-to-scene level-scene *tiles*)
 
   (setf *player-tex* (load-texture-from-file
                       renderer
