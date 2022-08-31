@@ -11,12 +11,10 @@
 
 ;;; Data mixins
 
-(defclass pos ()
+(defclass rect ()
   ((x :accessor x :initform 0 :initarg :x)
-   (y :accessor y :initform 0 :initarg :y)))
-
-(defclass size ()
-  ((w :accessor w :initform 0 :initarg :w)
+   (y :accessor y :initform 0 :initarg :y)
+   (w :accessor w :initform 0 :initarg :w)
    (h :accessor h :initform 0 :initarg :h)))
 
 (defclass color ()
@@ -43,7 +41,7 @@
 
 ;;; Game Entities
 
-(defclass box (entity renderable pos size color) ())
+(defclass box (entity renderable rect color) ())
 
 (defun make-box-entity (x y w h color)
   (make-instance 'box :x x :y y :w w :h h :color color))
@@ -57,7 +55,7 @@
                                                       (- y (y camera))
                                                       w h)))))
 
-(defclass sprite (entity renderable pos size color texture) ())
+(defclass sprite (entity renderable rect color texture) ())
 
 (defun make-sprite (tex rect x y w h &key color)
   (make-instance 'sprite :tex tex :rect rect :x x :y y :w w :h h :color color))
