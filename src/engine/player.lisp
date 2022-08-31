@@ -15,3 +15,9 @@
 (defun player-move (player &key (x 0) (y 0))
   (incf (x player) (floor x))
   (incf (y player) (floor y)))
+
+(defun player-teleport (player &key x y)
+  (when x
+    (setf (x player) x))
+  (when y
+    (setf (y player) y)))

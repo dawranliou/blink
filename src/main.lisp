@@ -17,8 +17,14 @@
 
 (defparameter *tiles*
   '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
-    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 1 2 1 2 1)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
@@ -28,10 +34,12 @@
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
-    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
-    (1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
-    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
     (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)))
 
@@ -59,17 +67,22 @@
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt) level-scene
-    (when (gethash "Right" keys)
-      (player-move *player* :x (* dt +0.5)))
+    (let ((orig-x (x *player*))
+          (orig-y (y *player*)))
+      (when (gethash "Right" keys)
+        (player-move *player* :x (* dt +0.5)))
+      (when (gethash "Left" keys)
+        (player-move *player* :x (* dt -0.5)))
+      (when (gethash "Up" keys)
+        (player-move *player* :y (* dt -0.5)))
+      (when (gethash "Down" keys)
+        (player-move *player* :y (* dt +0.5)))
 
-    (when (gethash "Left" keys)
-      (player-move *player* :x (* dt -0.5)))
-
-    (when (gethash "Up" keys)
-      (player-move *player* :y (* dt -0.5)))
-
-    (when (gethash "Down" keys)
-      (player-move *player* :y (* dt +0.5)))))
+      (when (loop :for entity :in (entities level-scene)
+                  :thereis (and (typep entity 'tile)
+                                (wallp entity)
+                                (collidep *player* entity)))
+        (player-teleport *player* :x orig-x :y orig-y)))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
