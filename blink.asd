@@ -30,5 +30,6 @@
                              (:file "entity")
                              (:file "tile")
                              (:file "player")
+                             (:file "physics")
                              (:file "window")))
                (:file "main")))
