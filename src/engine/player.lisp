@@ -2,7 +2,7 @@
 
 (defparameter +player-speed+ 16)
 
-(defclass player (sprite) ())
+(defclass player (sprite velocity) ())
 
 (defun make-player (tex x y)
   (make-instance 'player

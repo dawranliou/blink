@@ -17,6 +17,10 @@
    (w :accessor w :initform 0 :initarg :w)
    (h :accessor h :initform 0 :initarg :h)))
 
+(defclass velocity ()
+  ((vx :accessor vx :initform 0 :initarg :vx)
+   (vy :accessor vy :initform 0 :initarg :vy)))
+
 (defclass color ()
   ((color :accessor color :initform nil :initarg :color)))
 
