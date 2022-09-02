@@ -17,6 +17,9 @@
    (w :accessor w :initform 0 :initarg :w)
    (h :accessor h :initform 0 :initarg :h)))
 
+(defun make-rect (x y &key (w +sprite-size+) (h +sprite-size+))
+  (make-instance 'rect :x x :y y :w w :h h))
+
 (defclass velocity ()
   ((vx :accessor vx :initform 0 :initarg :vx)
    (vy :accessor vy :initform 0 :initarg :vy)))

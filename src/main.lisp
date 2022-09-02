@@ -77,9 +77,16 @@
       (t (setf (vy *player*) 0)))
 
     ;; collision detection
-
-    (incf (x *player*) (floor (* dt (vx *player*))))
-    (incf (y *player*) (floor (* dt (vy *player*))))))
+    (let ((h (h *player*))
+          (w (w *player*))
+          (target-x (+ (x *player*) (floor (* dt (vx *player*)))))
+          (target-y (+ (y *player*) (floor (* dt (vy *player*))))))
+      (if (can-move-to *tiles* (make-rect target-x (y *player*) :w w :h h))
+          (setf (x *player*) target-x)
+          (setf (vx *player*) 0))
+      (if (can-move-to *tiles* (make-rect (x *player*) target-y :w w :h h))
+          (setf (y *player*) target-y)
+          (setf (vy *player*) 0)))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*

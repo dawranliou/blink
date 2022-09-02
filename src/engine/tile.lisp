@@ -21,7 +21,28 @@
         do (loop for tile-id in row
                  for x = 0 then (incf x +sprite-size+)
                  when (not (zerop tile-id))
-                   do (add-to-scene scene (make-tile tile-id x y :solidp t)))))
+                 do (add-to-scene scene (make-tile tile-id x y :solidp t)))))
 
 ;; (load-room *room*)
 ;; (remove-all-entities-from-scene (scene *window*))
+
+(defun solidp (tiles x y)
+  (let ((x-idx (floor x +sprite-size+))
+        (y-idx (floor y +sprite-size+)))
+    (case (nth x-idx (nth y-idx tiles))
+      ((1 2) t)
+      (otherwise nil))))
+
+;; (solidp *tiles* 0 0)
+;; (solidp *tiles* 63 64)
+;; (solidp *tiles* 64 63)
+
+(defun can-move-to (tiles rect)
+  (with-slots (x y w h) rect
+    (notany #'solidp
+            (list tiles tiles tiles tiles)
+            (list x  (+ x w) x       (+ x w))
+            (list y  y       (+ y h) (+ y h)))))
+
+;; (can-move-to *tiles* (make-rect 64 64))
+;; (can-move-to *tiles* (make-rect 63 64))
