@@ -67,22 +67,19 @@
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt) level-scene
-    (let ((orig-x (x *player*))
-          (orig-y (y *player*)))
-      (when (gethash "Right" keys)
-        (player-move *player* :x (* dt +0.5)))
-      (when (gethash "Left" keys)
-        (player-move *player* :x (* dt -0.5)))
-      (when (gethash "Space" keys)
-        (jump *player*))
-      (when (not (zerop (vy *player*)))
-        (free-fall *player* dt))
+    (cond
+      ((gethash "Right" keys) (setf (vx *player*) +0.5))
+      ((gethash "Left" keys) (setf (vx *player*) -0.5))
+      (t (setf (vx *player*) 0)))
+    (cond
+      ((gethash "Up" keys) (setf (vy *player*) -0.5))
+      ((gethash "Down" keys) (setf (vy *player*) +0.5))
+      (t (setf (vy *player*) 0)))
 
-      (when (loop :for entity :in (entities level-scene)
-                  :thereis (and (typep entity 'tile)
-                                (wallp entity)
-                                (collidep *player* entity)))
-        (player-teleport *player* :x orig-x :y orig-y)))))
+    ;; collision detection
+
+    (incf (x *player*) (floor (* dt (vx *player*))))
+    (incf (y *player*) (floor (* dt (vy *player*))))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
