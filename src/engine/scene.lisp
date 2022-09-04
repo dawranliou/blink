@@ -13,7 +13,7 @@
   ((last-tick-time :accessor last-tick-time :initform (sdl2:get-ticks))
    (entities :accessor entities :initform '())
    (dt :accessor dt :initform 0)
-   (camera :accessor camera :initform (make-instance 'camera))))
+   (camera :accessor camera :initarg :camera :initform (make-instance 'camera))))
 
 (defun add-to-scene (scene entity)
   (push entity (entities scene)))

@@ -47,7 +47,10 @@
 (defvar *player* nil)
 (defvar *bg-tex* nil)
 
-(defclass level-scene (scene) ())
+(defclass level-scene (scene) ()
+  ;; (:default-initargs
+  ;;  :camera (make-instance 'lerp-camera))
+  )
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf *bg-tex* (load-texture-from-file
