@@ -2,7 +2,8 @@
 
 (defparameter +player-speed+ 16)
 
-(defclass player (sprite velocity) ())
+(defclass player (sprite velocity)
+  ((groundedp :accessor groundedp :initform nil)))
 
 (defun make-player (tex x y)
   (make-instance 'player

@@ -67,26 +67,39 @@
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt) level-scene
+    ;; update player state
+    (with-slots (x y w h groundedp) *player*
+      (setf groundedp
+            (collide-with-tile *tiles* (make-rect x (+ y (* dt 0.5)) :w w :h h))))
+
+    ;; update horizontal speed
     (cond
       ((gethash "Right" keys) (setf (vx *player*) +0.5))
       ((gethash "Left" keys) (setf (vx *player*) -0.5))
       (t (setf (vx *player*) 0)))
-    (cond
-      ((gethash "Up" keys) (setf (vy *player*) -0.5))
-      ((gethash "Down" keys) (setf (vy *player*) +0.5))
-      (t (setf (vy *player*) 0)))
+
+    ;; update vertical speed
+    (if (groundedp *player*)
+        (cond
+          ((gethash "Space" keys) (jump *player*))
+          (t (setf (vy *player*) 0)))
+        (free-fall *player* dt))
 
     ;; collision detection
     (let ((h (h *player*))
           (w (w *player*))
           (target-x (+ (x *player*) (floor (* dt (vx *player*)))))
           (target-y (+ (y *player*) (floor (* dt (vy *player*))))))
-      (if (can-move-to *tiles* (make-rect target-x (y *player*) :w w :h h))
-          (setf (x *player*) target-x)
-          (setf (vx *player*) 0))
-      (if (can-move-to *tiles* (make-rect (x *player*) target-y :w w :h h))
-          (setf (y *player*) target-y)
-          (setf (vy *player*) 0)))))
+      ;; X collision
+      (let ((tile (collide-with-tile *tiles* (make-rect target-x (y *player*) :w w :h h))))
+        (if tile
+          (setf (vx *player*) 0)
+          (setf (x *player*) target-x)))
+      ;; Y collision
+      (let ((tile (collide-with-tile *tiles* (make-rect (x *player*) target-y :w w :h h))))
+        (if tile
+            (setf (vy *player*) 0)
+            (setf (y *player*) target-y))))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
@@ -107,3 +120,4 @@
 ;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
 ;; (remove-all-entities-from-scene (scene *window*))
 ;; (setf (kit.sdl2:render-enabled *window*) t)
+;; (setf (x *player*) 100 (y *player*) 100)

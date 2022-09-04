@@ -4,14 +4,13 @@
 (defparameter +max-speed+ 1)
 
 (defun jump (entity)
-  (setf (vy entity) -1))
+  (setf (vy entity) -2))
 
 (defun free-fall (entity dt)
   (let ((target-speed (+ (vy entity) (* dt +gravity+))))
     (setf (vy entity) (if (< target-speed +max-speed+)
                         target-speed
-                        +max-speed+)))
-  (incf (y entity) (floor (* dt (vy entity)))))
+                        +max-speed+))))
 
 (defgeneric collidep (obj-a obj-b)
   (:method (obj-a obj-b)

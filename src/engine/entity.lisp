@@ -17,6 +17,10 @@
    (w :accessor w :initform 0 :initarg :w)
    (h :accessor h :initform 0 :initarg :h)))
 
+(defmethod print-object ((rect rect) stream)
+  (print-unreadable-object (rect stream :type t)
+    (format stream "{~A,~A}" (x rect) (y rect))))
+
 (defun make-rect (x y &key (w +sprite-size+) (h +sprite-size+))
   (make-instance 'rect :x x :y y :w w :h h))
 

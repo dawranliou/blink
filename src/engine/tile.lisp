@@ -37,6 +37,25 @@
 ;; (solidp *tiles* 63 64)
 ;; (solidp *tiles* 64 63)
 
+(defun collide-with-tile (tiles rect)
+  (with-slots (x y w h) rect
+    (cond
+      ((solidp tiles x y)
+       (make-rect (* +sprite-size+ (floor x +sprite-size+))
+                  (* +sprite-size+ (floor y +sprite-size+))))
+      ((solidp tiles (+ x w) y)
+       (make-rect (* +sprite-size+ (floor (+ x w) +sprite-size+))
+                  (* +sprite-size+ (floor y +sprite-size+))))
+      ((solidp tiles x (+ y h))
+       (make-rect (* +sprite-size+ (floor x +sprite-size+))
+                  (* +sprite-size+ (floor (+ y h) +sprite-size+))))
+      ((solidp tiles (+ x w) (+ y h))
+       (make-rect (* +sprite-size+ (floor (+ x w) +sprite-size+))
+                  (* +sprite-size+ (floor (+ y h) +sprite-size+))))
+      (t nil))))
+
+;; (collide-with-tile *tiles* (make-rect 64 63))
+
 (defun can-move-to (tiles rect)
   (with-slots (x y w h) rect
     (notany #'solidp
