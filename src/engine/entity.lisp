@@ -2,6 +2,8 @@
 
 (defvar *debug* nil)
 
+;; (setf *debug* t)
+
 (defclass entity ()
   ((entity-id :reader entity-id :initform (gensym "ENTITY-ID-"))))
 
@@ -76,8 +78,11 @@
         (camera *camera*))
     (with-slots (tex rect x y w h color) sprite
       (when *debug*
-        (apply #'sdl2:set-render-draw-color renderer color)
-        (sdl2:render-draw-rect renderer (sdl2:make-rect x y w h)))
+        (apply #'sdl2:set-render-draw-color renderer (or color +gray-50+))
+        (sdl2:render-draw-rect renderer
+                               (sdl2:make-rect (- x (x camera))
+                                               (- y (y camera))
+                                               w h)))
       (when color
         (destructuring-bind (r g b _a) color
           (declare (ignore _a))
