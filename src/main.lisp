@@ -16,7 +16,7 @@
 ;; (defparameter *scene-views* '())
 
 (defparameter *tiles*
-  '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
+  '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
     (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
@@ -25,7 +25,7 @@
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 1 2 1 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 2 1 2 1 2)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
@@ -34,8 +34,8 @@
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
+    (1 2 0 0 0 0 0 0 0 0 0 0 1 2 1 2 0 0 1 2)
+    (2 1 0 0 0 0 0 0 0 0 0 0 2 1 2 1 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
     (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
     (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
@@ -89,20 +89,29 @@
         (free-fall *player* dt))
 
     ;; collision detection
-    (let ((h (h *player*))
-          (w (w *player*))
-          (target-x (+ (x *player*) (floor (* dt (vx *player*)))))
-          (target-y (+ (y *player*) (floor (* dt (vy *player*))))))
-      ;; X collision
-      (let ((tile (collide-with-tile *tiles* (make-rect target-x (y *player*) :w w :h h))))
-        (if tile
-          (setf (vx *player*) 0)
-          (setf (x *player*) target-x)))
-      ;; Y collision
-      (let ((tile (collide-with-tile *tiles* (make-rect (x *player*) target-y :w w :h h))))
-        (if tile
-            (setf (vy *player*) 0)
-            (setf (y *player*) target-y))))))
+    (with-slots (x y vx vy w h) *player*
+      (let ((target-x (+ x (floor (* dt vx))))
+            (target-y (+ y (floor (* dt vy)))))
+        ;; X collision
+        (cond
+          ;; Left
+          ((or (solidp *tiles* target-x target-y)
+               (solidp *tiles* target-x (+ target-y h -1)))
+           (setf vx 0
+                 x (* +sprite-size+ (floor (+ target-x w) +sprite-size+))))
+          ;; Right
+          ((or (solidp *tiles* (+ target-x w) target-y)
+               (solidp *tiles* (+ target-x w) (+ target-y h -21)))
+           (setf vx 0
+                 x (* +sprite-size+ (floor target-x +sprite-size+))))
+          (t (setf x target-x)))
+        ;; Y collision (bottom)
+        (if (or (solidp *tiles* x (+ target-y h))
+                (solidp *tiles* (+ x w) (+ target-y h)))
+            (setf vy 0
+                  y (* +sprite-size+ (floor target-y +sprite-size+)))
+            (progn (free-fall *player* dt)
+                   (setf y target-y)))))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
@@ -119,8 +128,11 @@
   *window*)
 
 ;; (run)
-;; (load-room *room*)
+;; (add-tiles-to-scene (scene *window*) *tiles*)
 ;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
+;; (add-to-scene (scene *window*) *player*)
 ;; (remove-all-entities-from-scene (scene *window*))
-;; (setf (kit.sdl2:render-enabled *window*) t)
+;; (setf *debug* t)
+;; (setf *debug* nil)
 ;; (setf (x *player*) 100 (y *player*) 100)
+;; (setf (kit.sdl2:render-enabled *window*) t)
