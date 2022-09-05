@@ -79,9 +79,12 @@
 
     ;; update horizontal speed
     (cond
-      ((gethash "Right" keys) (setf (vx *player*) +0.5))
-      ((gethash "Left" keys) (setf (vx *player*) -0.5))
-      (t (setf (vx *player*) 0)))
+      ((gethash "Right" keys) (progn (setf (vx *player*) +0.5)
+                                     (set-animation *player* :run)))
+      ((gethash "Left" keys) (progn (setf (vx *player*) -0.5)
+                                    (set-animation *player* :run)))
+      (t (setf (vx *player*) 0)
+         (set-animation *player* :idle)))
 
     ;; update vertical speed
     (if (groundedp *player*)

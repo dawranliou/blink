@@ -21,3 +21,10 @@
       (setf (frame animator) 0))
     (setf (rect animator)
           (get-current-animation-rect animator (current-animation animator)))))
+
+(defun set-animation (animator animation-key)
+  (unless (eql animation-key (current-animation animator))
+    (setf (timer animator) 0
+          (frame animator) 0
+          (rect animator) (get-current-animation-rect animator animation-key)))
+  (setf (current-animation animator) animation-key))
