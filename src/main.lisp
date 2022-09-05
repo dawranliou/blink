@@ -90,6 +90,8 @@
           (t (setf (vy *player*) 0)))
         (free-fall *player* dt))
 
+    (tick-animator *player* dt)
+
     ;; collision detection
     (with-slots (x y vx vy w h) *player*
       (let ((target-x (+ x (floor (* dt vx))))

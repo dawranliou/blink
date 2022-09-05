@@ -29,6 +29,7 @@
                              (:file "scene")
                              (:file "entity")
                              (:file "tile")
+                             (:file "animator")
                              (:file "player")
                              (:file "physics")
                              (:file "window")))
