@@ -73,7 +73,7 @@
     ;; update player state
     (with-slots (x y w h groundedp) *player*
       (setf groundedp
-            (collide-with-tile *tiles* (make-rect x (+ y (* dt 0.5)) :w w :h h))))
+            (collide-with-tile *tiles* (make-rect x (+ y 1) :w w :h h))))
 
     ;; update horizontal speed
     (cond
@@ -93,25 +93,23 @@
       (let ((target-x (+ x (floor (* dt vx))))
             (target-y (+ y (floor (* dt vy)))))
         ;; X collision
-        (cond
-          ;; Left
-          ((or (solidp *tiles* target-x target-y)
-               (solidp *tiles* target-x (+ target-y h -1)))
-           (setf vx 0
-                 x (* +sprite-size+ (floor (+ target-x w) +sprite-size+))))
-          ;; Right
-          ((or (solidp *tiles* (+ target-x w) target-y)
-               (solidp *tiles* (+ target-x w) (+ target-y h -21)))
-           (setf vx 0
-                 x (* +sprite-size+ (floor target-x +sprite-size+))))
-          (t (setf x target-x)))
-        ;; Y collision (bottom)
-        (if (or (solidp *tiles* x (+ target-y h))
-                (solidp *tiles* (+ x w) (+ target-y h)))
-            (setf vy 0
-                  y (* +sprite-size+ (floor target-y +sprite-size+)))
-            (progn (free-fall *player* dt)
-                   (setf y target-y)))))))
+        (setf (x *player*) target-x)
+        (let ((tiles (collide-with-tile *tiles* *player*)))
+          (when tiles
+            (loop :for tile :in tiles
+                  :do (if (< 0 vx)
+                          (setf (x *player*) (- (x tile) (w *player*)))
+                          (setf (x *player*) (+ (x tile) (w tile)))))
+            (setf (vx *player*) 0)))
+        ;; Y collision
+        (setf (y *player*) target-y)
+        (let ((tiles (collide-with-tile *tiles* *player*)))
+          (when tiles
+            (loop :for tile :in tiles
+                  :do (if (< 0 vy)
+                          (setf (y *player*) (- (y tile) (h *player*)))
+                          (setf (y *player*) (+ (y tile) (h tile)))))
+            (setf (vy *player*) 0)))))))
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
@@ -127,12 +125,17 @@
   (kit.sdl2:start)
   *window*)
 
-;; (run)
-;; (add-tiles-to-scene (scene *window*) *tiles*)
-;; (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
-;; (add-to-scene (scene *window*) *player*)
-;; (remove-all-entities-from-scene (scene *window*))
-;; (setf *debug* t)
-;; (setf *debug* nil)
-;; (setf (x *player*) 100 (y *player*) 100)
-;; (setf (kit.sdl2:render-enabled *window*) t)
+#|
+(run)
+(add-tiles-to-scene (scene *window*) *tiles*)
+(setf *player* (make-player *player-tex*
+                            (* 4 +sprite-size+)
+                            (* 10 +sprite-size+)))
+(add-to-scene (scene *window*) *player*)
+(remove-all-entities-from-scene (scene *window*))
+(setf *debug* t)
+(setf *debug* nil)
+(setf (x *player*) 511)
+(incf (x *player*) +sprite-size+)
+(setf (kit.sdl2:render-enabled *window*) t)
+|#

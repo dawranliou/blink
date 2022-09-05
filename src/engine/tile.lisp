@@ -26,6 +26,10 @@
 ;; (load-room *room*)
 ;; (remove-all-entities-from-scene (scene *window*))
 
+(defun rect-at (x y)
+  (make-rect (* +sprite-size+ (floor x +sprite-size+))
+             (* +sprite-size+ (floor y +sprite-size+))))
+
 (defun solidp (tiles x y)
   (let ((x-idx (floor x +sprite-size+))
         (y-idx (floor y +sprite-size+)))
@@ -36,32 +40,17 @@
 ;; (solidp *tiles* 0 0)
 ;; (solidp *tiles* 63 64)
 ;; (solidp *tiles* 64 63)
+;; (solidp *tiles* 64 64)
 
 (defun collide-with-tile (tiles rect)
   (with-slots (x y w h) rect
-    (cond
-      ((solidp tiles x y)
-       (make-rect (* +sprite-size+ (floor x +sprite-size+))
-                  (* +sprite-size+ (floor y +sprite-size+))))
-      ((solidp tiles (+ x w) y)
-       (make-rect (* +sprite-size+ (floor (+ x w) +sprite-size+))
-                  (* +sprite-size+ (floor y +sprite-size+))))
-      ((solidp tiles x (+ y h))
-       (make-rect (* +sprite-size+ (floor x +sprite-size+))
-                  (* +sprite-size+ (floor (+ y h) +sprite-size+))))
-      ((solidp tiles (+ x w) (+ y h))
-       (make-rect (* +sprite-size+ (floor (+ x w) +sprite-size+))
-                  (* +sprite-size+ (floor (+ y h) +sprite-size+))))
-      (t nil))))
+    (loop :for (x y) :in `((,x          ,y)
+                           (,(+ x w -1) ,y)
+                           (,x          ,(+ y h -1))
+                           (,(+ x w -1) ,(+ y h -1)))
+          :when (solidp tiles x y)
+            :collect (rect-at x y))))
 
+;; (collide-with-tile *tiles* (make-rect 64 64))
 ;; (collide-with-tile *tiles* (make-rect 64 63))
-
-(defun can-move-to (tiles rect)
-  (with-slots (x y w h) rect
-    (notany #'solidp
-            (list tiles tiles tiles tiles)
-            (list x  (+ x w) x       (+ x w))
-            (list y  y       (+ y h) (+ y h)))))
-
-;; (can-move-to *tiles* (make-rect 64 64))
-;; (can-move-to *tiles* (make-rect 63 64))
+;; (collide-with-tile *tiles* (make-rect 0 0))
