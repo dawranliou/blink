@@ -61,7 +61,9 @@
   (setf *player-tex* (load-texture-from-file
                       renderer
                       (relative-path #P"assets/player.png")))
-  (setf *player* (make-player *player-tex* (* 4 +sprite-size+) (* 10 +sprite-size+)))
+  (setf *player* (make-player *player-tex*
+                              (* 4 +sprite-size+)
+                              (* 10 +sprite-size+)))
   (add-to-scene level-scene *player*))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)
@@ -113,15 +115,18 @@
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
-    (set-scene-camera level-scene :x (- x (/ +width+ 2)) :y (- y (/ +height+ 2)))))
+    (set-scene-camera level-scene
+                      :x (- x (/ +width+ 2))
+                      :y (- y (/ +height+ 2)))))
 
 (defun run (&key (w +width+) (h +height+))
   (kit.sdl2:init)
   (sdl2:in-main-thread nil
-    (setf *window* (make-instance 'game-window
-                                  :title "Blink!"
-                                  :w w :h h
-                                  :init-scene (make-instance 'level-scene))))
+    (setf *window*
+          (make-instance 'game-window
+                         :title "Blink!"
+                         :w w :h h
+                         :init-scene (make-instance 'level-scene))))
   (kit.sdl2:start)
   *window*)
 

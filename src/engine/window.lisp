@@ -54,7 +54,8 @@
   (when (string= "Q" (string-upcase text))
     (kit.sdl2:close-window window)))
 
-(defmethod kit.sdl2:keyboard-event ((window game-window) state ts repeat-p keysym)
+(defmethod kit.sdl2:keyboard-event
+    ((window game-window) state ts repeat-p keysym)
   (with-slots (scene keys) window
     (let ((scancode (sdl2:scancode keysym)))
       (unless repeat-p
