@@ -1,10 +1,10 @@
 (in-package #:blink)
 
-(defparameter +gravity+ 0.01)
+(defparameter +gravity+ 0.003)
 (defparameter +max-speed+ 1)
 
 (defun jump (entity)
-  (setf (vy entity) -2))
+  (setf (vy entity) -1))
 
 (defun free-fall (entity dt)
   (let ((target-speed (+ (vy entity) (* dt +gravity+))))

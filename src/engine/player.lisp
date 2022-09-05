@@ -8,10 +8,10 @@
 (defun make-player (tex x y)
   (make-instance 'player
                  :tex tex
-                 :rect (sdl2:make-rect 0 48 16 16)
+                 :rect (sdl2:make-rect 0 0 8 8)
                  :x x :y y
-                 :h (* 2 +sprite-size+)
-                 :w (* 2 +sprite-size+)))
+                 :h +sprite-size+
+                 :w +sprite-size+))
 
 (defun player-move (player &key (x 0) (y 0))
   (incf (x player) (floor x))
