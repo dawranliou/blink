@@ -79,9 +79,11 @@
 
     ;; update horizontal speed
     (cond
-      ((gethash "Right" keys) (progn (setf (vx *player*) +0.5)
+      ((gethash "Right" keys) (progn (setf (vx *player*) +0.5
+                                           (flip *player*) nil)
                                      (set-animation *player* :run)))
-      ((gethash "Left" keys) (progn (setf (vx *player*) -0.5)
+      ((gethash "Left" keys) (progn (setf (vx *player*) -0.5
+                                          (flip *player*) '(:horizontal))
                                     (set-animation *player* :run)))
       (t (setf (vx *player*) 0)
          (set-animation *player* :idle)))

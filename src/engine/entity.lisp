@@ -35,7 +35,8 @@
 
 (defclass texture ()
   ((tex :accessor tex :initarg :tex)
-   (rect :accessor rect :initarg :rect)))
+   (rect :accessor rect :initarg :rect)
+   (flip :accessor flip :initarg :flip :initform nil)))
 
 ;;; System
 
@@ -76,7 +77,7 @@
 (defmethod render ((sprite sprite))
   (let ((renderer *renderer*)
         (camera *camera*))
-    (with-slots (tex rect x y w h color) sprite
+    (with-slots (tex rect flip x y w h color) sprite
       (when *debug*
         (apply #'sdl2:set-render-draw-color renderer (or color +gray-50+))
         (sdl2:render-draw-rect renderer
@@ -87,9 +88,10 @@
         (destructuring-bind (r g b _a) color
           (declare (ignore _a))
           (sdl2:set-texture-color-mod (texture tex) r g b)))
-      (sdl2:render-copy renderer
-                        (texture tex)
-                        :source-rect rect
-                        :dest-rect (sdl2:make-rect (- x (x camera))
-                                                   (- y (y camera))
-                                                   w h)))))
+      (sdl2:render-copy-ex renderer
+                           (texture tex)
+                           :source-rect rect
+                           :dest-rect (sdl2:make-rect (- x (x camera))
+                                                      (- y (y camera))
+                                                      w h)
+                           :flip flip))))
