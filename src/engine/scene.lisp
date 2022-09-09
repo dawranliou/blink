@@ -10,7 +10,7 @@
   (init *scene* :renderer renderer))
 
 (defclass scene ()
-  ((last-tick-time :accessor last-tick-time :initform (sdl2:get-ticks))
+  ((last-tick-time :accessor last-tick-time :initform nil)
    (entities :accessor entities :initform '())
    (dt :accessor dt :initform 0)
    (camera :accessor camera
@@ -42,8 +42,10 @@
 (defmethod update :before ((scene scene) &key &allow-other-keys)
   (with-slots (dt last-tick-time) scene
     (let ((current-tick-time (sdl2:get-ticks)))
-      (setf dt (- current-tick-time last-tick-time))
-      (setf last-tick-time current-tick-time))))
+      (unless last-tick-time
+        (setf last-tick-time current-tick-time))
+      (setf dt (- current-tick-time last-tick-time)
+            last-tick-time current-tick-time))))
 
 (defgeneric unload (scene &key &allow-other-keys))
 
