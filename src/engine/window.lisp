@@ -80,7 +80,6 @@
     (sdl2:set-render-draw-color renderer 0 0 0 255)
     (sdl2:render-clear renderer)
     (update scene :keys keys)
-    ;; (text renderer "Hello" 10 10)
     (run-render-system renderer (entities scene) (camera scene))))
 
 (defun game-window-rect (window)
@@ -88,7 +87,8 @@
     (sdl2:make-rect 0 0 w h)))
 
 (defmethod kit.sdl2:render :after ((window game-window))
-  (with-slots (renderer transp trans-alpha) window
+  (with-slots (renderer transp trans-alpha frames) window
+    (text renderer (format nil "~A" frames) 10 10)
     (when transp
       (let ((alpha (floor (* 255 (cond
                                    ((< trans-alpha 0) 0)
