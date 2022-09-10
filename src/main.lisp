@@ -156,5 +156,6 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
+(transition-to-scene *window* (make-instance 'level-scene))
 (setf (kit.sdl2:render-enabled *window*) t)
 |#
