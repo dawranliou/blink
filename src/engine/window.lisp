@@ -2,7 +2,7 @@
 
 (defclass game-window (kit.sdl2:window)
   ((renderer :initform nil :reader renderer)
-   (frames :initform 0)
+   (frames :initform 0 :accessor frames)
    (scene :accessor scene)
    ;; Scene transitioning
    (transp :accessor transp :initform nil)
@@ -70,6 +70,10 @@
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
+  (with-slots (frames) window
+    (incf frames)
+    (when (< 100 frames)
+      (setf frames 0)))
   (when (transp window)
     (update-transition window))
   (with-slots (frames renderer scene keys) window
