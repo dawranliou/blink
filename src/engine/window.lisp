@@ -11,9 +11,9 @@
    (trans-to-scene :accessor trans-to-scene :initform nil)
    (keys :accessor keys :initform (make-hash-table :test 'equal))))
 
-(defun transition-to-scene (game-window scene)
+(defun transition-to-scene (game-window scene &key (alpha 0.0))
   (setf (transp game-window) t
-        (trans-alpha game-window) 0.0
+        (trans-alpha game-window) alpha
         (trans-to-scene game-window) scene
         (trans-fade-out-p game-window) nil))
 
@@ -28,7 +28,7 @@
                                          '(:accelerated
                                            :presentvsync)))
     (sdl2:set-render-draw-blend-mode renderer :blend)
-    (transition-to-scene window init-scene)))
+    (transition-to-scene window init-scene :alpha 1.0)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
   (remove-all-entities-from-scene (scene window))
@@ -70,14 +70,14 @@
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (if (transp window)
-      (update-transition window)
-      (with-slots (frames renderer scene keys) window
-        (sdl2:set-render-draw-color renderer 0 0 0 255)
-        (sdl2:render-clear renderer)
-        (update scene :keys keys)
-        ;; (text renderer "Hello" 10 10)
-        (run-render-system renderer (entities scene) (camera scene)))))
+  (when (transp window)
+    (update-transition window))
+  (with-slots (frames renderer scene keys) window
+    (sdl2:set-render-draw-color renderer 0 0 0 255)
+    (sdl2:render-clear renderer)
+    (update scene :keys keys)
+    ;; (text renderer "Hello" 10 10)
+    (run-render-system renderer (entities scene) (camera scene))))
 
 (defun game-window-rect (window)
   (multiple-value-bind (w h) (kit.sdl2:window-size window)
