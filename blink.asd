@@ -32,6 +32,7 @@
                              (:file "tile")
                              (:file "animator")
                              (:file "player")
+                             (:file "npc")
                              (:file "physics")
                              (:file "window")))
                (:file "main")))

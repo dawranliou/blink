@@ -48,6 +48,7 @@
 (defvar *player-tex* nil)
 (defvar *player* nil)
 (defvar *bg-tex* nil)
+(defvar *npc-tex* nil)
 
 ;;; Title Scene
 
@@ -81,6 +82,11 @@
                   renderer
                   (relative-path #P"assets/bg.png")))
   (add-tiles-to-scene level-scene *tiles*)
+
+  (setf *npc-tex* (load-texture-from-file
+                  renderer
+                  (relative-path #P"assets/npcs.png")))
+  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768))
 
   (setf *player-tex* (load-texture-from-file
                       renderer
