@@ -83,18 +83,18 @@
                   (relative-path #P"assets/bg.png")))
   (add-tiles-to-scene level-scene *tiles*)
 
-  (setf *npc-tex* (load-texture-from-file
-                  renderer
-                  (relative-path #P"assets/npcs.png")))
-  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768))
-
   (setf *player-tex* (load-texture-from-file
                       renderer
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex*
                               (* 4 +sprite-size+)
                               (* 10 +sprite-size+)))
-  (add-to-scene level-scene *player*))
+  (add-to-scene level-scene *player*)
+
+  (setf *npc-tex* (load-texture-from-file
+                   renderer
+                   (relative-path #P"assets/npcs.png")))
+  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768)))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)
   (setf *player-tex* nil)

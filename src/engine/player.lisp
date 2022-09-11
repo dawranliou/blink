@@ -8,30 +8,30 @@
 (defun make-player (tex x y)
   (let ((player (make-instance 'player
                                :tex tex
-                               :rect (sdl2:make-rect 0 0 8 8)
+                               :rect (sdl2:make-rect 0 0 16 16)
                                :x x :y y
-                               :h 40
-                               :w 40
+                               :h 64
+                               :w 64
                                :current-animation :idle)))
     (with-slots (animations) player
       (setf (gethash :idle animations)
-            (list (sdl2:make-rect 0 0 8 8)
-                  (sdl2:make-rect 0 0 8 8)
-                  (sdl2:make-rect 8 0 8 8)
-                  (sdl2:make-rect 8 0 8 8)
-                  (sdl2:make-rect 0 0 8 8)
-                  (sdl2:make-rect 0 0 8 8)
-                  (sdl2:make-rect 8 0 8 8)
-                  (sdl2:make-rect 8 0 8 8)))
+            (list (sdl2:make-rect 0 0 16 16)
+                  (sdl2:make-rect 0 0 16 16)
+                  (sdl2:make-rect 16 0 16 16)
+                  (sdl2:make-rect 16 0 16 16)
+                  (sdl2:make-rect 0 0 16 16)
+                  (sdl2:make-rect 0 0 16 16)
+                  (sdl2:make-rect 16 0 16 16)
+                  (sdl2:make-rect 16 0 16 16)))
       (setf (gethash :run animations)
-            (list (sdl2:make-rect 8 8 8 8)
-                  (sdl2:make-rect 0 8 8 8)
-                  (sdl2:make-rect 8 8 8 8)
-                  (sdl2:make-rect 0 8 8 8)
-                  (sdl2:make-rect 8 8 8 8)
-                  (sdl2:make-rect 0 8 8 8)
-                  (sdl2:make-rect 8 8 8 8)
-                  (sdl2:make-rect 0 8 8 8))))
+            (list (sdl2:make-rect 0 16 16 16)
+                  (sdl2:make-rect 16 16 16 16)
+                  (sdl2:make-rect 0 16 16 16)
+                  (sdl2:make-rect 16 16 16 16)
+                  (sdl2:make-rect 0 16 16 16)
+                  (sdl2:make-rect 16 16 16 16)
+                  (sdl2:make-rect 0 16 16 16)
+                  (sdl2:make-rect 16 16 16 16))))
     player))
 
 (defun player-move (player &key (x 0) (y 0))
