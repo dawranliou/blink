@@ -54,7 +54,7 @@
 (defclass title-scene (scene) ())
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
-  (when (gethash "Space" keys)
+  (when (gethash "Z" keys)
     (transition-to-scene *window* (make-instance 'level-scene))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
@@ -63,7 +63,7 @@
     (text renderer "Spirited" 100 200 :font title-font)
     (text renderer "Act. 2" 100 260 :font title-font)
     (when (zerop (mod (floor (frames *window*) 20) 2))
-      (text renderer "Press <SPACE> to start" 100 350 :font small-font))))
+      (text renderer "Press <Z> to start" 100 350 :font small-font))))
 
 ;;; Level Scene
 
@@ -115,7 +115,7 @@
     ;; update vertical speed
     (if (groundedp *player*)
         (cond
-          ((gethash "Space" keys) (jump *player*))
+          ((gethash "Z" keys) (jump *player*))
           (t (setf (vy *player*) 0)))
         (free-fall *player* dt))
 
