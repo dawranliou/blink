@@ -14,7 +14,7 @@
 
 (defun tick-animator (animator dt)
   (incf (timer animator) dt)
-  (when (<= 250 (timer animator))
+  (when (<= 200 (timer animator))
     (setf (timer animator) 0)
     (incf (frame animator))
     (when (<= 8 (frame animator))
