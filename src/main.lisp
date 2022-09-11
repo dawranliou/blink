@@ -58,10 +58,12 @@
     (transition-to-scene *window* (make-instance 'level-scene))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
-  (text renderer "Spirited" 100 200 :font (make-font :size 54))
-  (text renderer "Act. 2" 100 260 :font (make-font :size 54))
-  (when (zerop (mod (floor (frames *window*) 20) 2))
-    (text renderer "Press <SPACE> to start" 100 350)))
+  (let ((title-font (make-font :size 64))
+        (small-font (make-font :size 24)))
+    (text renderer "Spirited" 100 200 :font title-font)
+    (text renderer "Act. 2" 100 260 :font title-font)
+    (when (zerop (mod (floor (frames *window*) 20) 2))
+      (text renderer "Press <SPACE> to start" 100 350 :font small-font))))
 
 ;;; Level Scene
 

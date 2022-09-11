@@ -17,7 +17,7 @@
 (defmethod free-resource ((font font))
   (sdl2-ttf:close-font (pointer font)))
 
-(defun make-font (&key (filename "assets/PROBE_10PX_OTF.otf") (size 18))
+(defun make-font (&key (filename "assets/ShareTechMono-Regular.ttf") (size 18))
   (let ((filename (relative-path filename)))
     (load-resource filename :type :font :size size)))
 
