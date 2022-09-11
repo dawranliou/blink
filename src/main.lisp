@@ -170,6 +170,10 @@
 #|
 (run)
 (add-tiles-to-scene (scene *window*) *tiles*)
+(remove-entity-from-scene *scene* *player*)
+(setf *player-tex* (load-texture-from-file
+                    (renderer *window*)
+                    (relative-path #P"assets/player.png")))
 (prog1 (setf *player* (make-player *player-tex*
                                    (* 4 +sprite-size+)
                                    (* 10 +sprite-size+)))

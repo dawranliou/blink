@@ -3,6 +3,7 @@
 (defvar *debug* nil)
 
 ;; (setf *debug* t)
+;; (setf *debug* nil)
 
 (defclass entity ()
   ((entity-id :reader entity-id :initform (gensym "ENTITY-ID-"))))
@@ -39,6 +40,24 @@
    (flip :accessor flip :initarg :flip :initform nil)))
 
 ;;; Game Entities
+(defclass text-bubble (entity rect color)
+  ((text-string :initarg :text-string :accessor text-string)
+   (text-size :initarg :text-size :initform 32 :accessor text-size)))
+
+(defun make-text-bubble (x y w h text-string &optional (text-size 32))
+  (make-instance 'text-bubble :x x :y y :w w :h h
+                              :text-string text-string
+                              :text-size text-size))
+
+(defmethod render (renderer (text-bubble text-bubble) &key camera)
+  (with-slots (x y w h color text-string text-size) text-bubble
+    (let ((dest-rect (sdl2:make-rect (- x (x camera))
+                                     (- y (y camera))
+                                     w h)))
+      (apply #'sdl2:set-render-draw-color renderer (or color +white+))
+      (sdl2:render-draw-rect renderer dest-rect)
+      (text renderer text-string (- x (x camera)) (- y (y camera))
+            :font (make-font :size text-size)))))
 
 (defclass box (entity rect color) ())
 

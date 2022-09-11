@@ -18,6 +18,9 @@
 (defun add-to-scene (scene entity)
   (push entity (entities scene)))
 
+(defun remove-entity-from-scene (scene entity)
+  (setf (entities scene) (remove entity (entities scene))))
+
 (defun remove-all-entities-from-scene (scene)
   (setf (entities scene) nil))
 
