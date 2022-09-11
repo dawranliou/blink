@@ -50,4 +50,4 @@
 (defmethod unload (obj &key &allow-other-keys))
 
 (defmethod render (renderer (scene scene) &key &allow-other-keys)
-  (run-render-system renderer (entities scene) :camera (camera scene)))
+  (run-renderer-system renderer (entities scene) :camera (camera scene)))
