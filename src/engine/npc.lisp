@@ -2,14 +2,16 @@
 
 (defvar *npcs* (make-hash-table))
 
-(defclass npc (sprite animator) ())
+(defclass npc (sprite animator interactable) ())
 
-(defun make-npc (tex npc-id x y &key (w 64) (h 64))
+(defun make-npc (tex npc-id x y &key (w 64) (h 64) active-sprite)
   (let ((npc (make-instance 'npc
                             :tex tex
                             :rect (sdl2:make-rect 0 (* npc-id 16) 16 16)
                             :x x :y y :h h :w w
                             :current-animation :idle)))
+    (when active-sprite
+      (setf (active-sprite npc) active-sprite))
     (with-slots (animations) npc
       (setf (gethash :idle animations)
             (list (sdl2:make-rect 0 0 16 16)

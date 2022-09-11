@@ -49,6 +49,7 @@
 (defvar *player* nil)
 (defvar *bg-tex* nil)
 (defvar *npc-tex* nil)
+(defvar *objects-tex* nil)
 
 ;;; Title Scene
 
@@ -78,6 +79,10 @@
                                                   +sprite-size+
                                                   +width+
                                                   +height+))
+  (setf *objects-tex* (load-texture-from-file
+                       renderer
+                       (relative-path #P"assets/objects.png")))
+
   (setf *bg-tex* (load-texture-from-file
                   renderer
                   (relative-path #P"assets/bg.png")))
@@ -94,7 +99,13 @@
   (setf *npc-tex* (load-texture-from-file
                    renderer
                    (relative-path #P"assets/npcs.png")))
-  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768)))
+  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768
+                                      :active-sprite
+                                      (make-sprite *objects-tex*
+                                                   (sdl2:make-rect 0 0 16 16)
+                                                   (+ 640 16)
+                                                   (- 768 32)
+                                                   32 32))))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)
   (setf *player-tex* nil)
@@ -126,6 +137,7 @@
         (free-fall *player* dt))
 
     (run-animator-system (entities level-scene) dt)
+    (run-interactor-system (entities level-scene) *player*)
 
     ;; collision detection
     (with-slots (x y vx vy w h) *player*

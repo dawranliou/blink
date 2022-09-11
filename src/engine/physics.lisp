@@ -28,3 +28,14 @@
 (collidep (make-instance 'rect :x 0 :y 0 :w 10 :h 10)
           (make-instance 'rect :x 11 :y 10 :w 10 :h 10))
 |#
+
+(defun collided-objs (other-objects this-obj)
+  (loop :for other-obj :in other-objects
+        :when (collidep other-obj this-obj)
+          :collect other-obj))
+
+#|
+(collided-objs (loop :for npc :being :the :hash-value :of *npcs*
+                     :collect npc)
+               *player*)
+|#
