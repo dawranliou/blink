@@ -22,6 +22,11 @@
     (setf (rect animator)
           (get-current-animation-rect animator (current-animation animator)))))
 
+(defun run-animator-system (entities dt)
+  (loop :for entity :in entities
+        :when (typep entity 'animator)
+        :do (tick-animator entity dt)))
+
 (defun set-animation (animator animation-key)
   (unless (eql animation-key (current-animation animator))
     (setf (timer animator) 0

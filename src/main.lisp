@@ -119,7 +119,7 @@
           (t (setf (vy *player*) 0)))
         (free-fall *player* dt))
 
-    (tick-animator *player* dt)
+    (run-animator-system (entities level-scene) dt)
 
     ;; collision detection
     (with-slots (x y vx vy w h) *player*
