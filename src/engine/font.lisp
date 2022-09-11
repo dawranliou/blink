@@ -17,12 +17,12 @@
 (defmethod free-resource ((font font))
   (sdl2-ttf:close-font (pointer font)))
 
-(defun make-default-font ()
-  (let ((filename (relative-path "assets/PROBE_10PX_OTF.otf")))
-    (load-resource filename :type :font :size 18)))
+(defun make-font (&key (filename "assets/PROBE_10PX_OTF.otf") (size 18))
+  (let ((filename (relative-path filename)))
+    (load-resource filename :type :font :size size)))
 
 (defun text (renderer text-string x y &key w h font)
-  (let* ((font-pointer (pointer (or font (make-default-font))))
+  (let* ((font-pointer (pointer (or font (make-font))))
          (surface (sdl2-ttf:render-text-solid font-pointer
                                               text-string
                                               255 255 255 0))
