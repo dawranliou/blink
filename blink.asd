@@ -26,6 +26,7 @@
                              (:file "texture")
                              (:file "font")
                              (:file "camera")
+                             (:file "renderer")
                              (:file "scene")
                              (:file "entity")
                              (:file "tile")

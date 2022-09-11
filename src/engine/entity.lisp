@@ -38,52 +38,34 @@
    (rect :accessor rect :initarg :rect)
    (flip :accessor flip :initarg :flip :initform nil)))
 
-;;; System
-
-(defvar *renderer*)
-
-(defclass renderable () ())
-
-(defgeneric render (this))
-
-(defun run-render-system (renderer entities camera)
-  (let ((*renderer* renderer)
-        (*camera* camera))
-    (loop :for entity :in entities
-          :when (typep entity 'renderable)
-            :do (render entity))))
-
 ;;; Game Entities
 
-(defclass box (entity renderable rect color) ())
+(defclass box (entity rect color) ())
 
 (defun make-box-entity (x y w h color)
   (make-instance 'box :x x :y y :w w :h h :color color))
 
-(defmethod render ((box box))
-  (let ((renderer *renderer*)
-        (camera *camera*))
-    (with-slots (x y w h color) box
-      (apply #'sdl2:set-render-draw-color renderer color)
-      (sdl2:render-draw-rect renderer (sdl2:make-rect (- x (x camera))
-                                                      (- y (y camera))
-                                                      w h)))))
+(defmethod render (renderer (box box) &key camera)
+  (with-slots (x y w h color) box
+    (apply #'sdl2:set-render-draw-color renderer color)
+    (let ((dest-rect (if camera
+                         (sdl2:make-rect (- x (x camera)) (- y (y camera)) w h)
+                         (sdl2:make-rect x y w h))))
+      (sdl2:render-draw-rect renderer dest-rect))))
 
-(defclass sprite (entity renderable rect color texture) ())
+(defclass sprite (entity rect color texture) ())
 
 (defun make-sprite (tex rect x y w h &key color)
   (make-instance 'sprite :tex tex :rect rect :x x :y y :w w :h h :color color))
 
-(defmethod render ((sprite sprite))
-  (let ((renderer *renderer*)
-        (camera *camera*))
-    (with-slots (tex rect flip x y w h color) sprite
+(defmethod render (renderer (sprite sprite) &key camera)
+  (with-slots (tex rect flip x y w h color) sprite
+    (let ((dest-rect (if camera
+                         (sdl2:make-rect (- x (x camera)) (- y (y camera)) w h)
+                         (sdl2:make-rect x y w h))))
       (when *debug*
         (apply #'sdl2:set-render-draw-color renderer (or color +gray-50+))
-        (sdl2:render-draw-rect renderer
-                               (sdl2:make-rect (- x (x camera))
-                                               (- y (y camera))
-                                               w h)))
+        (sdl2:render-draw-rect renderer dest-rect))
       (when color
         (destructuring-bind (r g b _a) color
           (declare (ignore _a))
@@ -91,7 +73,5 @@
       (sdl2:render-copy-ex renderer
                            (texture tex)
                            :source-rect rect
-                           :dest-rect (sdl2:make-rect (- x (x camera))
-                                                      (- y (y camera))
-                                                      w h)
+                           :dest-rect dest-rect
                            :flip flip))))

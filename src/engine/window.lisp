@@ -80,7 +80,7 @@
     (sdl2:set-render-draw-color renderer 0 0 0 255)
     (sdl2:render-clear renderer)
     (update scene :keys keys)
-    (run-render-system renderer (entities scene) (camera scene))))
+    (render renderer scene)))
 
 (defun game-window-rect (window)
   (multiple-value-bind (w h) (kit.sdl2:window-size window)
