@@ -49,6 +49,22 @@
 (defvar *player* nil)
 (defvar *bg-tex* nil)
 
+;;; Title Scene
+
+(defclass title-scene (scene) ())
+
+(defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
+  (when (gethash "Space" keys)
+    (transition-to-scene *window* (make-instance 'level-scene))))
+
+(defmethod render (renderer (title-scene title-scene) &key)
+  (text renderer "Spirited" 100 200 :font (make-font :size 54))
+  (text renderer "Act. 2" 100 260 :font (make-font :size 54))
+  (when (zerop (mod (floor (frames *window*) 20) 2))
+    (text renderer "Press <SPACE> to start" 100 350)))
+
+;;; Level Scene
+
 (defclass level-scene (scene) ()
   ;; (:default-initargs
   ;;  :camera (make-instance 'lerp-camera))
@@ -139,7 +155,7 @@
           (make-instance 'game-window
                          :title "Blink!"
                          :w w :h h
-                         :init-scene (make-instance 'level-scene))))
+                         :init-scene (make-instance 'title-scene))))
   (kit.sdl2:start)
   *window*)
 
@@ -156,6 +172,6 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-instance 'level-scene))
+(transition-to-scene *window* (make-instance 'title-scene))
 (setf (kit.sdl2:render-enabled *window*) t)
 |#

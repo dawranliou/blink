@@ -72,7 +72,7 @@
 (defmethod kit.sdl2:render ((window game-window))
   (with-slots (frames) window
     (incf frames)
-    (when (< 100 frames)
+    (when (< 6000 frames)
       (setf frames 0)))
   (when (transp window)
     (update-transition window))
@@ -88,7 +88,7 @@
 
 (defmethod kit.sdl2:render :after ((window game-window))
   (with-slots (renderer transp trans-alpha frames) window
-    (text renderer (format nil "~A" frames) 10 10)
+    ;; (text renderer (format nil "~A" frames) 10 10)
     (when transp
       (let ((alpha (floor (* 255 (cond
                                    ((< trans-alpha 0) 0)
