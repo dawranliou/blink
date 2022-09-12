@@ -15,7 +15,7 @@
   :build-operation #+linux "deploy-op"
                    #+darwin "osx-app-deploy-op"
   :build-pathname "blink"
-  :entry-point "blink:run"
+  :entry-point "blink:main"
   :depends-on (#:sdl2kit #:sdl2-image #:sdl2-ttf)
   :serial t
   :pathname "src"

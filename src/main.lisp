@@ -179,6 +179,10 @@
   (kit.sdl2:start)
   *window*)
 
+(defun main ()
+  (sdl2:make-this-thread-main
+   (lambda () (run))))
+
 #|
 (run)
 (add-tiles-to-scene (scene *window*) *tiles*)

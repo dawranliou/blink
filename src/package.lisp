@@ -3,4 +3,5 @@
 (defpackage #:blink
   (:use #:cl)
   (:export
-   #:run))
+   #:run
+   #:main))
