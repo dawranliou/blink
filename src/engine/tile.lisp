@@ -10,7 +10,7 @@
                  :x x :y y
                  :w +sprite-size+
                  :h +sprite-size+
-                 :color +gray-50+
+                 :color +gray-40+
                  :solidp solidp))
 
 ;; (make-tile 2 64 64)

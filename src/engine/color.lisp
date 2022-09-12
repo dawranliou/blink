@@ -9,5 +9,6 @@
     (rgb amount amount amount alpha)))
 
 (defparameter +black+ (gray 0))
+(defparameter +gray-40+ (gray 40))
 (defparameter +gray-50+ (gray 50))
 (defparameter +white+ (gray 100))

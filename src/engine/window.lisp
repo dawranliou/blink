@@ -79,7 +79,8 @@
   (with-slots (frames renderer scene keys) window
     (sdl2:set-render-draw-color renderer 0 0 0 255)
     (sdl2:render-clear renderer)
-    (update scene :keys keys)
+    (unless (transp window)
+      (update scene :keys keys))
     (render renderer scene)))
 
 (defun game-window-rect (window)
