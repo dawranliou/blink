@@ -24,7 +24,7 @@
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
-    (transition-to-scene *window* (make-instance 'level-scene))))
+    (transition-to-scene *window* (make-level "A" +room-1+))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
   (let ((title-font (make-font :size 64))
@@ -36,15 +36,34 @@
 
 ;;; Level Scene
 
-(defclass level-scene (scene) ()
-  ;; (:default-initargs
-  ;;  :camera (make-instance 'lerp-camera))
-  )
+(defclass level-scene (scene)
+  ((name :initarg :name :accessor name)
+   (tiles :initarg :tiles :accessor tiles)
+   ;; Somewhere around the top-left corner
+   (player-drop-in-x :initarg :player-drop-in-x
+                     :accessor player-drop-in-x
+                     :initform (* 4 +sprite-size+))
+   (player-drop-in-y :initarg :player-drop-in-y
+                     :accessor player-drop-in-y
+                     :initform (* 4 +sprite-size+))))
+
+(defmethod print-object ((level-scene level-scene) stream)
+  (print-unreadable-object (level-scene stream :type t)
+    (format stream "{ROOM ~A}" (name level-scene))))
+
+(defun make-level (name tiles &key (player-x (* 4 +sprite-size+))
+                                (player-y (* 4 +sprite-size+)))
+  (make-instance 'level-scene
+                 :name name
+                 :tiles tiles
+                 :player-drop-in-x player-x
+                 :player-drop-in-y player-y))
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf (camera level-scene)
-        (make-bounded-camera (* (length (first +room-1+)) +sprite-size+)
-                             (* (length +room-1+) +sprite-size+)
+        (make-bounded-camera (* (length (first (tiles level-scene)))
+                                +sprite-size+)
+                             (* (length (tiles level-scene)) +sprite-size+)
                              +width+
                              +height+))
   (setf *objects-tex* (load-texture-from-file
@@ -54,14 +73,14 @@
   (setf *bg-tex* (load-texture-from-file
                   renderer
                   (relative-path #P"assets/bg.png")))
-  (add-tiles-to-scene level-scene +room-1+)
+  (add-tiles-to-scene level-scene (tiles level-scene))
 
   (setf *player-tex* (load-texture-from-file
                       renderer
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex*
-                              (* 4 +sprite-size+)
-                              (* 10 +sprite-size+)))
+                              (player-drop-in-x level-scene)
+                              (player-drop-in-y level-scene)))
   (add-to-scene level-scene *player*)
 
   (setf *npc-tex* (load-texture-from-file
@@ -80,11 +99,11 @@
   (setf *bg-tex* nil))
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
-  (with-slots (dt) level-scene
+  (with-slots (dt tiles) level-scene
     ;; update player state
     (with-slots (x y w h groundedp) *player*
       (setf groundedp
-            (collide-with-tile +room-1+ (make-rect x (+ y 1) :w w :h h))))
+            (collide-with-tile tiles (make-rect x (+ y 1) :w w :h h))))
 
     ;; update horizontal speed
     (cond
@@ -113,7 +132,7 @@
             (target-y (+ y (floor (* dt vy)))))
         ;; X collision
         (setf (x *player*) target-x)
-        (let ((tiles (collide-with-tile +room-1+ *player*)))
+        (let ((tiles (collide-with-tile tiles *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vx)
@@ -122,7 +141,7 @@
             (setf (vx *player*) 0)))
         ;; Y collision
         (setf (y *player*) target-y)
-        (let ((tiles (collide-with-tile +room-1+ *player*)))
+        (let ((tiles (collide-with-tile tiles *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vy)
