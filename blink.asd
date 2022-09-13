@@ -36,4 +36,5 @@
                              (:file "npc")
                              (:file "physics")
                              (:file "window")))
+               (:file "map")
                (:file "main")))

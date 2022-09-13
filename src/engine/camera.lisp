@@ -16,10 +16,10 @@
     ((<= max v) max)
     (t v)))
 
-(defun make-bounded-camera (tiles tile-size screen-w screen-h)
+(defun make-bounded-camera (total-x total-y screen-w screen-h)
   (make-instance 'camera
-                 :max-x (- (* (length (first tiles)) tile-size) screen-w)
-                 :max-y (- (* (length tiles) tile-size) screen-h)))
+                 :max-x (- total-x screen-w)
+                 :max-y (- total-y screen-h)))
 
 (defmethod (setf x) (new-val (camera camera))
   (with-slots (min-x max-x) camera

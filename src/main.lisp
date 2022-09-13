@@ -11,39 +11,6 @@
 ;;; GLOBAL STATES
 
 (defvar *window* nil)
-;; (defparameter *scene* (make-instance 'scene))
-;; (defparameter *window* nil)
-;; (defparameter *scene-views* '())
-
-(defparameter *tiles*
-  '((1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
-    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 1 2 1 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 2 1 2 1 2)
-    (1 2 0 0 0 0 0 0 0 1 2 1 2 0 0 0 0 0 1 2 0 0 0 0 0)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 0 0 0 0 0)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 0 0 0 0 0)
-    (1 2 0 0 1 2 1 2 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 0 0 0 0 0)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 0 0 0 0 0)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0)
-    (2 1 0 0 0 0 0 0 0 0 0 0 2 1 2 1 0 0 2 1 0 0 0 0 0)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 1 2 1 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 2 1 2 1 2)
-    (1 2 0 0 1 2 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1)
-    (2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2)
-    (1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1)
-    (2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2)))
 
 (defvar *player-tex* nil)
 (defvar *player* nil)
@@ -75,10 +42,11 @@
   )
 
 (defmethod init ((level-scene level-scene) &key renderer)
-  (setf (camera level-scene) (make-bounded-camera *tiles*
-                                                  +sprite-size+
-                                                  +width+
-                                                  +height+))
+  (setf (camera level-scene)
+        (make-bounded-camera (* (length (first +room-1+)) +sprite-size+)
+                             (* (length +room-1+) +sprite-size+)
+                             +width+
+                             +height+))
   (setf *objects-tex* (load-texture-from-file
                        renderer
                        (relative-path #P"assets/objects.png")))
@@ -86,7 +54,7 @@
   (setf *bg-tex* (load-texture-from-file
                   renderer
                   (relative-path #P"assets/bg.png")))
-  (add-tiles-to-scene level-scene *tiles*)
+  (add-tiles-to-scene level-scene +room-1+)
 
   (setf *player-tex* (load-texture-from-file
                       renderer
@@ -116,7 +84,7 @@
     ;; update player state
     (with-slots (x y w h groundedp) *player*
       (setf groundedp
-            (collide-with-tile *tiles* (make-rect x (+ y 1) :w w :h h))))
+            (collide-with-tile +room-1+ (make-rect x (+ y 1) :w w :h h))))
 
     ;; update horizontal speed
     (cond
@@ -145,7 +113,7 @@
             (target-y (+ y (floor (* dt vy)))))
         ;; X collision
         (setf (x *player*) target-x)
-        (let ((tiles (collide-with-tile *tiles* *player*)))
+        (let ((tiles (collide-with-tile +room-1+ *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vx)
@@ -154,7 +122,7 @@
             (setf (vx *player*) 0)))
         ;; Y collision
         (setf (y *player*) target-y)
-        (let ((tiles (collide-with-tile *tiles* *player*)))
+        (let ((tiles (collide-with-tile +room-1+ *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vy)
@@ -185,7 +153,7 @@
 
 #|
 (run)
-(add-tiles-to-scene (scene *window*) *tiles*)
+(add-tiles-to-scene (scene *window*) +room-1+)
 (remove-entity-from-scene *scene* *player*)
 (setf *player-tex* (load-texture-from-file
                     (renderer *window*)
