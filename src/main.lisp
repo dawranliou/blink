@@ -41,6 +41,9 @@
    (tiles :initarg :tiles :accessor tiles)
    (portals :initarg :portals :accessor portals)
    ;; Somewhere around the top-left corner
+   (player-drop-in-flip :initarg :player-drop-in-flip
+                        :accessor player-drop-in-flip
+                        :initform nil)
    (player-drop-in-x :initarg :player-drop-in-x
                      :accessor player-drop-in-x
                      :initform (* 4 +sprite-size+))
@@ -53,20 +56,21 @@
     (format stream "{ROOM:~A}" (room-sym level-scene))))
 
 (defun make-level (room-sym tiles &key (player-x (* 4 +sprite-size+))
-                                (player-y (* 4 +sprite-size+)))
+                                    (player-y (* 4 +sprite-size+))
+                                    (player-flip nil))
   (make-instance 'level-scene
                  :room-sym room-sym
                  :tiles tiles
+                 :player-drop-in-flip player-flip
                  :player-drop-in-x player-x
                  :player-drop-in-y player-y))
 
 (defun transition-room (from-room to-room)
   (case (intern (format nil "~A->~A" from-room to-room) "KEYWORD")
-    (:A->B (list +room-b+ (* 4 +sprite-size+) (* 14 +sprite-size+)))
-    (:A->C (list +room-c+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
-    (:B->A (list +room-a+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
-    (:C->A (list +room-a+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
-    (t nil)))
+    (:A->B (list +room-b+ (* 1 +sprite-size+) (* 14 +sprite-size+) nil))
+    (:A->C (list +room-c+ (* 1 +sprite-size+) (* 4 +sprite-size+) nil))
+    (:B->A (list +room-a+ (* 22 +sprite-size+) (* 6 +sprite-size+) '(:horizontal)))
+    (:C->A (list +room-a+ (* 22 +sprite-size+) (* 24 +sprite-size+) '(:horizontal)))))
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf (camera level-scene)
@@ -75,6 +79,10 @@
                              (* (length (tiles level-scene)) +sprite-size+)
                              +width+
                              +height+))
+  (set-scene-camera level-scene
+                    :x (- (player-drop-in-x level-scene) (/ +width+ 2))
+                    :y (- (player-drop-in-y level-scene) (/ +height+ 2)))
+
   (setf *objects-tex* (load-texture-from-file
                        renderer
                        (relative-path #P"assets/objects.png")))
@@ -90,6 +98,7 @@
   (setf *player* (make-player *player-tex*
                               (player-drop-in-x level-scene)
                               (player-drop-in-y level-scene)))
+  (setf (flip *player*) (player-drop-in-flip level-scene))
   (add-to-scene level-scene *player*)
 
   (setf *npc-tex* (load-texture-from-file
@@ -115,11 +124,12 @@
         ;; (format t "PORTAL ~A~%" portal-sym)
         (let ((room-data (transition-room (room-sym level-scene) portal-sym)))
           (when room-data
-            (destructuring-bind (tiles init-x init-y) room-data
-              (format t "Init Room ~A at [~A, ~A]~%" portal-sym init-x init-y)
+            (destructuring-bind (tiles init-x init-y init-flip) room-data
               (transition-to-scene *window*
                                    (make-level portal-sym tiles
-                                               :player-x init-x :player-y init-y)))))))
+                                               :player-x init-x
+                                               :player-y init-y
+                                               :player-flip init-flip)))))))
 
     ;; update player state
     (with-slots (x y w h groundedp) *player*
@@ -207,10 +217,10 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-level "Room A" +room-a+))
-(transition-to-scene *window* (make-level "Room C" +room-c+))
+(transition-to-scene *window* (make-level 'A +room-a+))
+(transition-to-scene *window* (make-level 'C +room-c+))
 (transition-to-scene *window*
-                     (make-level "Room B" +room-b+
+                     (make-level 'B +room-b+
                                  :player-x 1
                                  :player-y (* 14 +sprite-size+)))
 (run)
