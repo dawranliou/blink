@@ -24,7 +24,7 @@
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
-    (transition-to-scene *window* (make-level 'A +room-a+))))
+    (transition-to-scene *window* (make-level 'A))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
   (let ((title-font (make-font :size 64))
@@ -41,36 +41,47 @@
    (tiles :initarg :tiles :accessor tiles)
    (portals :initarg :portals :accessor portals)
    ;; Somewhere around the top-left corner
-   (player-drop-in-flip :initarg :player-drop-in-flip
-                        :accessor player-drop-in-flip
-                        :initform nil)
-   (player-drop-in-x :initarg :player-drop-in-x
-                     :accessor player-drop-in-x
-                     :initform (* 4 +sprite-size+))
-   (player-drop-in-y :initarg :player-drop-in-y
-                     :accessor player-drop-in-y
-                     :initform (* 4 +sprite-size+))))
+   (player-init-animation :initarg :player-init-animation
+                          :accessor player-init-animation
+                          :initform :idle)
+   (player-init-flip :initarg :player-init-flip
+                     :accessor player-init-flip
+                     :initform nil)
+   (player-init-x :initarg :player-init-x
+                  :accessor player-init-x
+                  :initform (* 4 +sprite-size+))
+   (player-init-y :initarg :player-init-y
+                  :accessor player-init-y
+                  :initform (* 4 +sprite-size+))))
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)
     (format stream "{ROOM:~A}" (room-sym level-scene))))
 
-(defun make-level (room-sym tiles &key (player-x (* 4 +sprite-size+))
-                                    (player-y (* 4 +sprite-size+))
-                                    (player-flip nil))
+(defun room->tiles (room-sym)
+  (case room-sym
+    (A +room-a+)
+    (B +room-b+)
+    (C +room-c+)))
+
+(defun make-level (room-sym &key (player-x (* 4 +sprite-size+))
+                              (player-y (* 4 +sprite-size+))
+                              (player-flip nil)
+                              (player-animation :idle))
   (make-instance 'level-scene
                  :room-sym room-sym
-                 :tiles tiles
-                 :player-drop-in-flip player-flip
-                 :player-drop-in-x player-x
-                 :player-drop-in-y player-y))
+                 :tiles (room->tiles room-sym)
+                 :player-init-animation player-animation
+                 :player-init-flip player-flip
+                 :player-init-x player-x
+                 :player-init-y player-y))
 
 (defun transition-room (from-room to-room)
   (case (intern (format nil "~A->~A" from-room to-room) "KEYWORD")
-    (:A->B (list +room-b+ (* 1 +sprite-size+) (* 14 +sprite-size+) nil))
-    (:A->C (list +room-c+ (* 1 +sprite-size+) (* 4 +sprite-size+) nil))
-    (:B->A (list +room-a+ (* 22 +sprite-size+) (* 6 +sprite-size+) '(:horizontal)))
-    (:C->A (list +room-a+ (* 22 +sprite-size+) (* 24 +sprite-size+) '(:horizontal)))))
+    (:A->B (list (* 1 +sprite-size+) (* 14 +sprite-size+) nil))
+    (:A->C (list (* 1 +sprite-size+) (* 4 +sprite-size+) nil))
+    (:B->A (list (* 22 +sprite-size+) (* 6 +sprite-size+) '(:horizontal)))
+    (:C->A (list (* 22 +sprite-size+) (* 24 +sprite-size+) '(:horizontal)))))
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf (camera level-scene)
@@ -80,8 +91,8 @@
                              +width+
                              +height+))
   (set-scene-camera level-scene
-                    :x (- (player-drop-in-x level-scene) (/ +width+ 2))
-                    :y (- (player-drop-in-y level-scene) (/ +height+ 2)))
+                    :x (- (player-init-x level-scene) (/ +width+ 2))
+                    :y (- (player-init-y level-scene) (/ +height+ 2)))
 
   (setf *objects-tex* (load-texture-from-file
                        renderer
@@ -96,9 +107,10 @@
                       renderer
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex*
-                              (player-drop-in-x level-scene)
-                              (player-drop-in-y level-scene)))
-  (setf (flip *player*) (player-drop-in-flip level-scene))
+                              (player-init-x level-scene)
+                              (player-init-y level-scene)
+                              :current-animation (player-init-animation level-scene)))
+  (setf (flip *player*) (player-init-flip level-scene))
   (add-to-scene level-scene *player*)
 
   (setf *npc-tex* (load-texture-from-file
@@ -124,9 +136,10 @@
         ;; (format t "PORTAL ~A~%" portal-sym)
         (let ((room-data (transition-room (room-sym level-scene) portal-sym)))
           (when room-data
-            (destructuring-bind (tiles init-x init-y init-flip) room-data
+            (destructuring-bind (init-x init-y init-flip) room-data
               (transition-to-scene *window*
-                                   (make-level portal-sym tiles
+                                   (make-level portal-sym
+                                               :player-animation :run
                                                :player-x init-x
                                                :player-y init-y
                                                :player-flip init-flip)))))))
@@ -217,10 +230,10 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-level 'A +room-a+))
-(transition-to-scene *window* (make-level 'C +room-c+))
+(transition-to-scene *window* (make-level 'A))
+(transition-to-scene *window* (make-level 'C))
 (transition-to-scene *window*
-                     (make-level 'B +room-b+
+                     (make-level 'B
                                  :player-x 1
                                  :player-y (* 14 +sprite-size+)))
 (run)

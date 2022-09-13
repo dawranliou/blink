@@ -5,14 +5,14 @@
 (defclass player (sprite velocity animator)
   ((groundedp :accessor groundedp :initform nil)))
 
-(defun make-player (tex x y)
+(defun make-player (tex x y &key (current-animation :idle))
   (let ((player (make-instance 'player
                                :tex tex
                                :rect (sdl2:make-rect 0 0 16 16)
                                :x x :y y
                                :h 64
                                :w 64
-                               :current-animation :idle)))
+                               :current-animation current-animation)))
     (with-slots (animations) player
       (setf (gethash :idle animations)
             (list (sdl2:make-rect 0 0 16 16)
