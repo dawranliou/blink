@@ -24,7 +24,7 @@
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
-    (transition-to-scene *window* (make-level "A" +room-1+))))
+    (transition-to-scene *window* (make-level "Room 1" +room-1+))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
   (let ((title-font (make-font :size 64))
@@ -49,7 +49,7 @@
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)
-    (format stream "{ROOM ~A}" (name level-scene))))
+    (format stream "{~A}" (name level-scene))))
 
 (defun make-level (name tiles &key (player-x (* 4 +sprite-size+))
                                 (player-y (* 4 +sprite-size+)))
@@ -171,7 +171,6 @@
    (lambda () (run))))
 
 #|
-(run)
 (add-tiles-to-scene (scene *window*) +room-1+)
 (remove-entity-from-scene *scene* *player*)
 (setf *player-tex* (load-texture-from-file
@@ -187,6 +186,11 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-instance 'title-scene))
+(transition-to-scene *window* (make-level "Room 1" +room-1+))
+(transition-to-scene *window*
+                     (make-level "Room 2" +room-2+
+                                 :player-x 1
+                                 :player-y (* 14 +sprite-size+)))
+(run)
 (setf (kit.sdl2:render-enabled *window*) t)
 |#
