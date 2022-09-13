@@ -24,7 +24,7 @@
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
-    (transition-to-scene *window* (make-level "Room 1" +room-1+))))
+    (transition-to-scene *window* (make-level 'A +room-a+))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
   (let ((title-font (make-font :size 64))
@@ -37,8 +37,9 @@
 ;;; Level Scene
 
 (defclass level-scene (scene)
-  ((name :initarg :name :accessor name)
+  ((room-sym :initarg :room-sym :accessor room-sym)
    (tiles :initarg :tiles :accessor tiles)
+   (portals :initarg :portals :accessor portals)
    ;; Somewhere around the top-left corner
    (player-drop-in-x :initarg :player-drop-in-x
                      :accessor player-drop-in-x
@@ -49,15 +50,23 @@
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)
-    (format stream "{~A}" (name level-scene))))
+    (format stream "{ROOM:~A}" (room-sym level-scene))))
 
-(defun make-level (name tiles &key (player-x (* 4 +sprite-size+))
+(defun make-level (room-sym tiles &key (player-x (* 4 +sprite-size+))
                                 (player-y (* 4 +sprite-size+)))
   (make-instance 'level-scene
-                 :name name
+                 :room-sym room-sym
                  :tiles tiles
                  :player-drop-in-x player-x
                  :player-drop-in-y player-y))
+
+(defun transition-room (from-room to-room)
+  (case (intern (format nil "~A->~A" from-room to-room) "KEYWORD")
+    (:A->B (list +room-b+ (* 4 +sprite-size+) (* 14 +sprite-size+)))
+    (:A->C (list +room-c+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
+    (:B->A (list +room-a+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
+    (:C->A (list +room-a+ (* 4 +sprite-size+) (* 4 +sprite-size+)))
+    (t nil)))
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf (camera level-scene)
@@ -100,10 +109,22 @@
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt tiles) level-scene
+    ;; Portal player to room
+    (let ((portal-sym (first (collide-with-portal tiles *player*))))
+      (when portal-sym
+        ;; (format t "PORTAL ~A~%" portal-sym)
+        (let ((room-data (transition-room (room-sym level-scene) portal-sym)))
+          (when room-data
+            (destructuring-bind (tiles init-x init-y) room-data
+              (format t "Init Room ~A at [~A, ~A]~%" portal-sym init-x init-y)
+              (transition-to-scene *window*
+                                   (make-level portal-sym tiles
+                                               :player-x init-x :player-y init-y)))))))
+
     ;; update player state
     (with-slots (x y w h groundedp) *player*
       (setf groundedp
-            (collide-with-tile tiles (make-rect x (+ y 1) :w w :h h))))
+            (collide-with-tile-at-rect tiles (make-rect x (+ y 1) :w w :h h))))
 
     ;; update horizontal speed
     (cond
@@ -132,7 +153,7 @@
             (target-y (+ y (floor (* dt vy)))))
         ;; X collision
         (setf (x *player*) target-x)
-        (let ((tiles (collide-with-tile tiles *player*)))
+        (let ((tiles (collide-with-tile-at-rect tiles *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vx)
@@ -141,7 +162,7 @@
             (setf (vx *player*) 0)))
         ;; Y collision
         (setf (y *player*) target-y)
-        (let ((tiles (collide-with-tile tiles *player*)))
+        (let ((tiles (collide-with-tile-at-rect tiles *player*)))
           (when tiles
             (loop :for tile :in tiles
                   :do (if (< 0 vy)
@@ -171,7 +192,7 @@
    (lambda () (run))))
 
 #|
-(add-tiles-to-scene (scene *window*) +room-1+)
+(add-tiles-to-scene (scene *window*) +room-a+)
 (remove-entity-from-scene *scene* *player*)
 (setf *player-tex* (load-texture-from-file
                     (renderer *window*)
@@ -186,9 +207,10 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-level "Room 1" +room-1+))
+(transition-to-scene *window* (make-level "Room A" +room-a+))
+(transition-to-scene *window* (make-level "Room C" +room-c+))
 (transition-to-scene *window*
-                     (make-level "Room 2" +room-2+
+                     (make-level "Room B" +room-b+
                                  :player-x 1
                                  :player-y (* 14 +sprite-size+)))
 (run)

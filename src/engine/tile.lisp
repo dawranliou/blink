@@ -1,9 +1,10 @@
 (in-package #:blink)
 
 (defclass tile (sprite)
-  ((solid :initarg :solid :accessor solid :initform nil)))
+  ((solid :initarg :solid :accessor solid :initform nil)
+   (portal :initarg :portal :accessor portal :initform nil)))
 
-(defun make-tile (tile-id x y &key solid)
+(defun make-tile (tile-id x y &key solid portal)
   (make-instance 'tile
                  :tex *bg-tex*
                  :rect (sdl2:make-rect (* tile-id 16) 0 16 16)
@@ -11,7 +12,8 @@
                  :w +sprite-size+
                  :h +sprite-size+
                  :color +gray-40+
-                 :solid solid))
+                 :solid solid
+                 :portal portal))
 
 ;; (make-tile 2 64 64)
 
@@ -20,8 +22,14 @@
         for y = 0 then (incf y +sprite-size+)
         do (loop for tile-id in row
                  for x = 0 then (incf x +sprite-size+)
-                 when (not (zerop tile-id))
-                 do (add-to-scene scene (make-tile tile-id x y :solid t)))))
+                 do (cond
+                      ((and (numberp tile-id)
+                            (= 0 tile-id))
+                       nil)
+                      ((symbolp tile-id)
+                       (add-to-scene scene (make-tile 0 x y :portal tile-id)))
+                      (t
+                       (add-to-scene scene (make-tile tile-id x y :solid t)))))))
 
 ;; (load-room *room*)
 ;; (remove-all-entities-from-scene (scene *window*))
@@ -40,12 +48,23 @@
           (otherwise nil))
         t)))
 
-;; (solid +room-1+ 0 0)
-;; (solid +room-1+ 63 64)
-;; (solid +room-1+ 64 63)
-;; (solid +room-1+ 64 64)
+;; (solid +room-a+ 0 0)
+;; (solid +room-a+ 63 64)
+;; (solid +room-a+ 64 63)
+;; (solid +room-a+ 64 64)
 
-(defun collide-with-tile (tiles rect)
+(defun portal-at (tiles x y)
+  (let ((x-idx (floor x +sprite-size+))
+        (y-idx (floor y +sprite-size+)))
+    (when (and (<= 0 x-idx (length (first tiles)))
+               (<= 0 y-idx (length tiles)))
+      (let ((tile (nth x-idx (nth y-idx tiles))))
+        (when (symbolp tile)
+          tile)))))
+
+;; (portal-at '((0 0 A)) 64 0)
+
+(defun collide-with-tile-at-rect (tiles rect)
   (with-slots (x y w h) rect
     (loop :for (x y) :in `((,x          ,y)
                            (,(+ x w -1) ,y)
@@ -54,6 +73,18 @@
           :when (solidp tiles x y)
             :collect (rect-at x y))))
 
-;; (collide-with-tile +room-1+ (make-rect 64 64))
-;; (collide-with-tile +room-1+ (make-rect 64 63))
-;; (collide-with-tile +room-1+ (make-rect 0 0))
+;; (collide-with-tile-at-rect +room-a+ (make-rect 64 64))
+;; (collide-with-tile-at-rect +room-a+ (make-rect 64 63))
+;; (collide-with-tile-at-rect +room-a+ (make-rect 0 0))
+
+(defun collide-with-portal (tiles rect)
+  (with-slots (x y w h) rect
+    (loop :for (x y) :in `((,x          ,y)
+                           (,(+ x w -1) ,y)
+                           (,x          ,(+ y h -1))
+                           (,(+ x w -1) ,(+ y h -1)))
+          :for portal-sym = (portal-at tiles x y)
+          :when portal-sym
+            :collect portal-sym)))
+
+;; (collide-with-portal '((0 0 A)) (make-rect 64 0))
