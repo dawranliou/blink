@@ -234,7 +234,7 @@
 (transition-to-scene *window* (make-level 'C))
 (transition-to-scene *window*
                      (make-level 'B
-                                 :player-x 1
+                                 :player-x +sprite-size+
                                  :player-y (* 14 +sprite-size+)))
 (run)
 (setf (kit.sdl2:render-enabled *window*) t)

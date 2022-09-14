@@ -6,4 +6,4 @@ release:
 	sbcl --noinform --non-interactive --load release.lisp
 
 clean:
-	rm ./blink
+	rm ./bin
