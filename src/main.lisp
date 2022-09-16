@@ -108,8 +108,8 @@
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex*
                               (player-init-x level-scene)
-                              (player-init-y level-scene)
-                              :current-animation (player-init-animation level-scene)))
+                              (player-init-y level-scene)))
+  (set-animation *player* (player-init-animation level-scene))
   (setf (flip *player*) (player-init-flip level-scene))
   (add-to-scene level-scene *player*)
 
