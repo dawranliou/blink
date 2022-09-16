@@ -54,3 +54,9 @@
 
 (defmethod render (renderer (scene scene) &key &allow-other-keys)
   (run-renderer-system renderer (entities scene) :camera (camera scene)))
+
+(defgeneric quit (scene on-quit-window))
+
+(defmethod quit ((scene scene) on-quit-window)
+  (unload scene)
+  (funcall on-quit-window))

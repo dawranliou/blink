@@ -102,10 +102,6 @@
     ;; (sdl2:render-fill-rect renderer (game-window-rect window))
     (sdl2:render-present renderer)))
 
-(defmethod kit.sdl2:textinput-event :after ((window game-window) ts text)
-  (when (string= "Q" (string-upcase text))
-    (kit.sdl2:close-window window)))
-
 (defmethod kit.sdl2:keyboard-event
     ((window game-window) state ts repeat-p keysym)
   (with-slots (scene keys) window
@@ -120,4 +116,5 @@
     ((window game-window) state ts repeat-p keysym)
   (let ((scancode (sdl2:scancode keysym)))
     (when (eq :scancode-escape scancode)
-      (kit.sdl2:close-window window))))
+      (quit (scene window)
+            (lambda () (kit.sdl2:close-window window))))))
