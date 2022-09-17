@@ -18,7 +18,7 @@
   (sdl2-ttf:close-font (pointer font)))
 
 (defun make-font (resource-pool
-                  &key (filename "assets/ShareTechMono-Regular.ttf") (size 18))
+                  &key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
   (let ((filename (relative-path filename)))
     (load-resource resource-pool filename :type :font :size size)))
 
