@@ -12,8 +12,7 @@
    ;; Quick menu
    (pause-menu-selected :accessor pause-menu-selected :initform 0)
    (pause-menu-items :initarg :pause-menu-items :accessor pause-menu-items)
-   (quit-confirmed-p :accessor quit-confirmed-p :initform nil)
-   (on-quitting :accessor on-quitting :initarg :on-quitting)))
+   (quit-confirmed-p :accessor quit-confirmed-p :initform nil)))
 
 (defun add-to-scene (scene entity)
   (push entity (entities scene)))
@@ -41,9 +40,6 @@
 (defmethod update (obj &key &allow-other-keys))
 
 (defmethod update :around ((scene scene) &key keys keys-prev &allow-other-keys)
-  (when (quit-confirmed-p scene)
-    (unload scene)
-    (funcall (on-quitting scene)))
   (with-slots (dt last-tick-time) scene
     (let ((current-tick-time (sdl2:get-ticks)))
       (unless last-tick-time
@@ -66,7 +62,14 @@
          (setf (pause-menu-selected scene)
                (clamp 0
                       (1+ (pause-menu-selected scene))
-                      (1- (length (pause-menu-items scene)))))))
+                      (1- (length (pause-menu-items scene))))))
+        ((and (gethash "X" keys)
+              (not (gethash "X" keys-prev)))
+         (cond
+           ((= 0 (pause-menu-selected scene))
+            (setf (pausedp scene) nil))
+           ((= 1 (pause-menu-selected scene))
+            (setf (quit-confirmed-p scene) t)))))
       (call-next-method)))
 
 (defgeneric unload (scene &key &allow-other-keys))

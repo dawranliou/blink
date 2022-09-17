@@ -86,8 +86,6 @@
                               (player-animation :idle))
   (make-instance 'level-scene
                  :w +width+ :h +height+
-                 :on-quitting (lambda ()
-                                (kit.sdl2:close-window *window*))
                  :room-sym room-sym
                  :tiles (room->tiles room-sym)
                  :player-init-animation player-animation

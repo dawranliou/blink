@@ -106,6 +106,11 @@
     ;; (sdl2:render-fill-rect renderer (game-window-rect window))
     (sdl2:render-present renderer)))
 
+(defmethod kit.sdl2:render :around ((window game-window))
+  (if (quit-confirmed-p (scene window))
+      (kit.sdl2:close-window window)
+      (call-next-method)))
+
 (defmethod kit.sdl2:keyboard-event
     ((window game-window) state ts repeat-p keysym)
   (with-slots (scene keys keys-prev) window
