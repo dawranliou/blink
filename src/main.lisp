@@ -72,15 +72,26 @@
                               (player-y (* 4 +sprite-size+))
                               (player-flip nil)
                               (player-animation :idle))
-  (make-instance 'level-scene
-                 :w +width+ :h +height+
-                 :on-quitting (lambda () (kit.sdl2:close-window *window*))
-                 :room-sym room-sym
-                 :tiles (room->tiles room-sym)
-                 :player-init-animation player-animation
-                 :player-init-flip player-flip
-                 :player-init-x player-x
-                 :player-init-y player-y))
+  (let ((level-scene
+          (make-instance 'level-scene
+                         :w +width+ :h +height+
+                         :on-quitting (lambda ()
+                                        (kit.sdl2:close-window *window*))
+                         :room-sym room-sym
+                         :tiles (room->tiles room-sym)
+                         :player-init-animation player-animation
+                         :player-init-flip player-flip
+                         :player-init-x player-x
+                         :player-init-y player-y)))
+    (setf (pause-menu-items level-scene)
+          (list (make-text-texture (renderer *window*)
+                                   "Resume"
+                                   :resource-pool (resources level-scene))
+                (make-text-texture (renderer *window*)
+                                   "Exit"
+                                   :resource-pool (resources level-scene))))
+    level-scene))
+
 
 (defun transition-room (from-room to-room)
   (case (intern (format nil "~A->~A" from-room to-room) "KEYWORD")
@@ -236,6 +247,7 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
+(transition-to-scene *window* (make-instance 'title-scene))
 (transition-to-scene *window* (make-level 'A))
 (transition-to-scene *window* (make-level 'C))
 (transition-to-scene *window*

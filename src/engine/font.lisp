@@ -36,3 +36,10 @@
                       texture
                       :source-rect (cffi:null-pointer)
                       :dest-rect destination-rect)))
+
+(defun make-text-texture (renderer text-string &key font resource-pool)
+  (let* ((font-pointer (pointer (or font (make-font resource-pool))))
+         (surface (sdl2-ttf:render-text-solid font-pointer
+                                              text-string
+                                              255 255 255 0)))
+    (sdl2:create-texture-from-surface renderer surface)))

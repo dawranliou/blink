@@ -9,6 +9,9 @@
    (dt :accessor dt :initform 0)
    (camera :accessor camera :initarg :camera)
    (pausedp :accessor pausedp :initform nil)
+   ;; Quick menu
+   (pause-menu-selected :accessor pause-menu-selected :initform 0)
+   (pause-menu-items :initarg :pause-menu-items :accessor pause-menu-items)
    (quit-confirmed-p :accessor quit-confirmed-p :initform nil)
    (on-quitting :accessor on-quitting :initarg :on-quitting)))
 
@@ -50,8 +53,21 @@
   (when (and (not (gethash "Escape" keys-prev))
              (gethash "Escape" keys))
     (setf (pausedp scene) (not (pausedp scene))))
-  (unless (pausedp scene)
-    (call-next-method)))
+  (if (pausedp scene)
+      (cond
+        ((and (gethash "Up" keys)
+              (not (gethash "Up" keys-prev)))
+         (setf (pause-menu-selected scene)
+               (clamp 0
+                      (1- (pause-menu-selected scene))
+                      (length (pause-menu-items scene)))))
+        ((and (gethash "Down" keys)
+              (not (gethash "Down" keys-prev)))
+         (setf (pause-menu-selected scene)
+               (clamp 0
+                      (1+ (pause-menu-selected scene))
+                      (1- (length (pause-menu-items scene)))))))
+      (call-next-method)))
 
 (defgeneric unload (scene &key &allow-other-keys))
 
@@ -66,5 +82,30 @@
 
 (defmethod render :after (renderer (scene scene) &key &allow-other-keys)
   (when (pausedp scene)
+    ;; Background blurring overlay
     (sdl2:set-render-draw-color renderer 0 0 0 100)
-    (sdl2:render-fill-rect renderer (sdl2:make-rect 0 0 (w scene) (h scene)))))
+    (sdl2:render-fill-rect renderer (sdl2:make-rect 0 0 (w scene) (h scene)))
+
+    ;; Dialog box
+    (sdl2:set-render-draw-color renderer 0 0 0 200)
+    (sdl2:render-fill-rect renderer
+                           (sdl2:make-rect 100 100
+                                           (- (w scene) 200)
+                                           (- (h scene) 200)))
+    (sdl2:set-render-draw-color renderer 255 255 255 255)
+    (sdl2:render-draw-rect renderer (sdl2:make-rect 100
+                                                    100
+                                                    (- (w scene) 200)
+                                                    (- (h scene) 200)))
+    (text renderer ">"
+          125 (+ 150 (* (pause-menu-selected scene) 50))
+          :resource-pool (resources scene))
+    (loop :for menu-item :in (pause-menu-items scene)
+          :for y = 150 :then (incf y 50)
+          :for dest-rect = (sdl2:make-rect 150 y
+                                           (sdl2:texture-width menu-item)
+                                           (sdl2:texture-height menu-item))
+          :do (sdl2:render-copy renderer
+                                menu-item
+                                :source-rect (cffi:null-pointer)
+                                :dest-rect dest-rect))))
