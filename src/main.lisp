@@ -39,7 +39,7 @@
                                  :resource-pool (resources title-scene)))))
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
-  (when (gethash "Z" keys)
+  (when (gethash "X" keys)
     (transition-to-scene *window* (make-level 'A))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
@@ -47,8 +47,25 @@
         (small-font (make-font (resources title-scene) :size 24)))
     (text renderer "Spirited" 100 200 :font title-font)
     (text renderer "Act. 2" 100 260 :font title-font)
-    (when (zerop (mod (floor (frames *window*) 20) 2))
-      (text renderer "Press <Z> to start" 100 350 :font small-font))))
+    (when (zerop (mod (floor (frames title-scene) 20) 2))
+      (text renderer "Press <X> to start" 100 350 :font small-font))))
+
+;;; End Scene
+(defclass end-scene (scene)
+  ()
+  (:default-initargs
+   :w +width+
+   :h +height+))
+
+(defmethod update ((end-scene end-scene) &key keys &allow-other-keys)
+  (when (gethash "X" keys)
+    (transition-to-scene *window* (make-title-scene))))
+
+(defmethod render (renderer (end-scene end-scene) &key)
+  (text renderer "The End" 100 200 :resource-pool (resources end-scene))
+  (when (zerop (mod (floor (frames end-scene) 20) 2))
+    (text renderer "Press <X> to restart" 100 350
+          :resource-pool (resources end-scene))))
 
 ;;; Level Scene
 
@@ -68,7 +85,10 @@
                   :initform (* 4 +sprite-size+))
    (player-init-y :initarg :player-init-y
                   :accessor player-init-y
-                  :initform (* 4 +sprite-size+))))
+                  :initform (* 4 +sprite-size+)))
+  (:default-initargs
+   :w +width+
+   :h +height+))
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)
@@ -85,7 +105,6 @@
                               (player-flip nil)
                               (player-animation :idle))
   (make-instance 'level-scene
-                 :w +width+ :h +height+
                  :room-sym room-sym
                  :tiles (room->tiles room-sym)
                  :player-init-animation player-animation
@@ -159,16 +178,20 @@
     ;; Portal player to room
     (let ((portal-sym (first (collide-with-portal tiles *player*))))
       (when portal-sym
-        ;; (format t "PORTAL ~A~%" portal-sym)
-        (let ((room-data (transition-room (room-sym level-scene) portal-sym)))
-          (when room-data
-            (destructuring-bind (init-x init-y init-flip) room-data
-              (transition-to-scene *window*
-                                   (make-level portal-sym
-                                               :player-animation :run
-                                               :player-x init-x
-                                               :player-y init-y
-                                               :player-flip init-flip)))))))
+        (case portal-sym
+          ;; (format t "PORTAL ~A~%" portal-sym)
+          (Z (transition-to-scene *window* (make-instance 'end-scene)))
+          (otherwise
+           (let ((room-data (transition-room (room-sym level-scene)
+                                             portal-sym)))
+             (when room-data
+               (destructuring-bind (init-x init-y init-flip) room-data
+                 (transition-to-scene *window*
+                                      (make-level portal-sym
+                                                  :player-animation :run
+                                                  :player-x init-x
+                                                  :player-y init-y
+                                                  :player-flip init-flip)))))))))
 
     ;; update player state
     (with-slots (x y w h groundedp) *player*
