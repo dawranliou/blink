@@ -26,6 +26,18 @@
    :w +width+
    :h +height+))
 
+(defun make-title-scene ()
+  (make-instance 'title-scene))
+
+(defmethod init ((title-scene title-scene) &key renderer &allow-other-keys)
+  (setf (pause-menu-items title-scene)
+        (list (make-text-texture renderer
+                                 "Resume"
+                                 :resource-pool (resources title-scene))
+              (make-text-texture renderer
+                                 "Exit"
+                                 :resource-pool (resources title-scene)))))
+
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
     (transition-to-scene *window* (make-level 'A))))
@@ -72,25 +84,16 @@
                               (player-y (* 4 +sprite-size+))
                               (player-flip nil)
                               (player-animation :idle))
-  (let ((level-scene
-          (make-instance 'level-scene
-                         :w +width+ :h +height+
-                         :on-quitting (lambda ()
-                                        (kit.sdl2:close-window *window*))
-                         :room-sym room-sym
-                         :tiles (room->tiles room-sym)
-                         :player-init-animation player-animation
-                         :player-init-flip player-flip
-                         :player-init-x player-x
-                         :player-init-y player-y)))
-    (setf (pause-menu-items level-scene)
-          (list (make-text-texture (renderer *window*)
-                                   "Resume"
-                                   :resource-pool (resources level-scene))
-                (make-text-texture (renderer *window*)
-                                   "Exit"
-                                   :resource-pool (resources level-scene))))
-    level-scene))
+  (make-instance 'level-scene
+                 :w +width+ :h +height+
+                 :on-quitting (lambda ()
+                                (kit.sdl2:close-window *window*))
+                 :room-sym room-sym
+                 :tiles (room->tiles room-sym)
+                 :player-init-animation player-animation
+                 :player-init-flip player-flip
+                 :player-init-x player-x
+                 :player-init-y player-y))
 
 
 (defun transition-room (from-room to-room)
@@ -110,6 +113,14 @@
   (set-scene-camera level-scene
                     :x (- (player-init-x level-scene) (/ +width+ 2))
                     :y (- (player-init-y level-scene) (/ +height+ 2)))
+
+  (setf (pause-menu-items level-scene)
+        (list (make-text-texture renderer
+                                 "Resume"
+                                 :resource-pool (resources level-scene))
+              (make-text-texture renderer
+                                 "Exit"
+                                 :resource-pool (resources level-scene))))
 
   (setf *objects-tex* (load-texture-from-file
                        renderer
@@ -223,7 +234,7 @@
           (make-instance 'game-window
                          :title "Blink!"
                          :w w :h h
-                         :init-scene (make-instance 'title-scene))))
+                         :init-scene (make-title-scene))))
   (kit.sdl2:start)
   *window*)
 
@@ -247,7 +258,7 @@
 (setf (x *player*) 100 (y *player*) 100)
 (setf (x *player*) 511)
 (incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-instance 'title-scene))
+(transition-to-scene *window* (make-title-scene))
 (transition-to-scene *window* (make-level 'A))
 (transition-to-scene *window* (make-level 'C))
 (transition-to-scene *window*
