@@ -6,6 +6,7 @@
    (h :accessor h :initarg :h)
    (resources :accessor resources :initform (make-hash-table))
    (entities :accessor entities :initform ())
+   (frames :initform 0 :accessor frames)
    (dt :accessor dt :initform 0)
    (camera :accessor camera :initarg :camera)
    (pausedp :accessor pausedp :initform nil)
@@ -40,7 +41,10 @@
 (defmethod update (obj &key &allow-other-keys))
 
 (defmethod update :around ((scene scene) &key keys keys-prev &allow-other-keys)
-  (with-slots (dt last-tick-time) scene
+  (with-slots (dt frames last-tick-time) scene
+    (incf frames)
+    (when (< 6000 frames)
+      (setf frames 0))
     (let ((current-tick-time (sdl2:get-ticks)))
       (unless last-tick-time
         (setf last-tick-time current-tick-time))

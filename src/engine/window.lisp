@@ -2,7 +2,6 @@
 
 (defclass game-window (kit.sdl2:window)
   ((renderer :initform nil :reader renderer)
-   (frames :initform 0 :accessor frames)
    (scene :accessor scene)
    ;; Scene transitioning
    (transp :accessor transp :initform nil)
@@ -69,19 +68,15 @@
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (with-slots (frames) window
-    (incf frames)
-    (when (< 6000 frames)
-      (setf frames 0)))
   (when (transp window)
     (update-transition window))
-  (with-slots (frames renderer scene keys keys-prev) window
+  (with-slots (renderer scene keys keys-prev) window
     (sdl2:set-render-draw-color renderer 0 0 0 255)
     (sdl2:render-clear renderer)
     (unless (transp window)
       (update scene :keys keys :keys-prev keys-prev))
     (render renderer scene)
-    ;; Record current frame's keys state to the prev key state table
+    ;; Record current rendering cycle's keys state to the prev key state table
     (loop :for k
             :being :the :hash-key
               :using (hash-value v) :of keys
@@ -92,8 +87,7 @@
     (sdl2:make-rect 0 0 w h)))
 
 (defmethod kit.sdl2:render :after ((window game-window))
-  (with-slots (renderer transp trans-alpha frames) window
-    ;; (text renderer (format nil "~A" frames) 10 10)
+  (with-slots (renderer transp trans-alpha) window
     (when transp
       (let ((alpha (floor (* 255 (cond
                                    ((< trans-alpha 0) 0)
