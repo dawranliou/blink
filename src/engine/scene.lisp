@@ -1,15 +1,5 @@
 (in-package #:blink)
 
-(defvar *scene* nil)
-(defvar *scene-prev* nil)
-
-(defun set-scene (scene &key renderer)
-  (setf *scene-prev* *scene*)
-  (when *scene*
-    (unload *scene*))
-  (setf *scene* scene)
-  (init *scene* :renderer renderer))
-
 (defclass scene ()
   ((last-tick-time :accessor last-tick-time :initform nil)
    (w :accessor w :initarg :w)

@@ -28,6 +28,7 @@
                                          '(:accelerated
                                            :presentvsync)))
     (sdl2:set-render-draw-blend-mode renderer :blend)
+    (setf (scene window) init-scene)
     (transition-to-scene window init-scene :alpha 1.0)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
@@ -61,7 +62,8 @@
         (progn
           (incf trans-alpha 0.05)
           (when (< 1.01 trans-alpha)
-            (set-scene trans-to-scene :renderer renderer)
+            (unload scene)
+            (init trans-to-scene :renderer renderer)
             (setf scene trans-to-scene
                   trans-fade-out-p t))))))
 
