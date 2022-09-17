@@ -24,13 +24,9 @@
 (defun remove-all-entities-from-scene (scene)
   (setf (entities scene) nil))
 
-(defun set-scene-camera (scene &key x y)
+(defun center-scene-camera (scene &key x y)
   (when (or x y)
-    (set-camera (camera scene) :x x :y y)))
-
-(defun move-scene-camera (scene &key dx dy)
-  (when (or dx dy)
-    (move-camera (camera scene) :dx dx :dy dy)))
+    (center-camera (camera scene) :x x :y y)))
 
 (defgeneric init (scene &key &allow-other-keys))
 

@@ -127,9 +127,9 @@
                              (* (length (tiles level-scene)) +sprite-size+)
                              +width+
                              +height+))
-  (set-scene-camera level-scene
-                    :x (- (player-init-x level-scene) (/ +width+ 2))
-                    :y (- (player-init-y level-scene) (/ +height+ 2)))
+  (center-scene-camera level-scene
+                       :x (player-init-x level-scene)
+                       :y (player-init-y level-scene))
 
   (setf (pause-menu-items level-scene)
         (list (make-text-texture renderer
@@ -244,9 +244,7 @@
 
 (defmethod update :after ((level-scene level-scene) &key &allow-other-keys)
   (with-slots (x y) *player*
-    (set-scene-camera level-scene
-                      :x (- x (/ +width+ 2))
-                      :y (- y (/ +height+ 2)))))
+    (center-scene-camera level-scene :x x :y y)))
 
 (defun run (&key (w +width+) (h +height+))
   (kit.sdl2:init)
