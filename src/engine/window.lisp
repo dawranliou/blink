@@ -31,13 +31,9 @@
     (transition-to-scene window init-scene :alpha 1.0)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
-  (remove-all-entities-from-scene (scene window))
   (with-slots (renderer) window
     (when (and (slot-boundp window 'renderer) renderer)
-      (sdl2:destroy-renderer renderer)))
-  (loop for resource being the hash-values of *resources*
-        do (free-resource resource))
-  (clrhash *resources*))
+      (sdl2:destroy-renderer renderer))))
 
 (defmethod kit.sdl2:close-window :after ((window game-window))
   (sdl2-ttf:quit)
@@ -116,5 +112,5 @@
     ((window game-window) state ts repeat-p keysym)
   (let ((scancode (sdl2:scancode keysym)))
     (when (eq :scancode-escape scancode)
-      (quit (scene window)
-            (lambda () (kit.sdl2:close-window window))))))
+      (with-slots (scene) window
+        (setf (pausedp scene) t)))))

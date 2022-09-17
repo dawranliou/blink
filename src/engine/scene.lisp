@@ -5,15 +5,22 @@
 
 (defun set-scene (scene &key renderer)
   (setf *scene-prev* *scene*)
-  (unload *scene*)
+  (when *scene*
+    (unload *scene*))
   (setf *scene* scene)
   (init *scene* :renderer renderer))
 
 (defclass scene ()
   ((last-tick-time :accessor last-tick-time :initform nil)
-   (entities :accessor entities :initform '())
+   (w :accessor w :initarg :w)
+   (h :accessor h :initarg :h)
+   (resources :accessor resources :initform (make-hash-table))
+   (entities :accessor entities :initform ())
    (dt :accessor dt :initform 0)
-   (camera :accessor camera :initarg :camera)))
+   (camera :accessor camera :initarg :camera)
+   (pausedp :accessor pausedp :initform nil)
+   (quit-confirmed-p :accessor quit-confirmed-p :initform nil)
+   (on-quitting :accessor on-quitting :initarg :on-quitting)))
 
 (defun add-to-scene (scene entity)
   (push entity (entities scene)))
@@ -48,15 +55,25 @@
       (setf dt (- current-tick-time last-tick-time)
             last-tick-time current-tick-time))))
 
+(defmethod update :around ((scene scene) &key &allow-other-keys)
+  (when (quit-confirmed-p scene)
+    (unload scene)
+    (funcall (on-quitting scene)))
+  (unless (pausedp scene)
+    (call-next-method)))
+
 (defgeneric unload (scene &key &allow-other-keys))
 
-(defmethod unload (obj &key &allow-other-keys))
+(defmethod unload ((scene scene) &key &allow-other-keys)
+  (remove-all-entities-from-scene scene)
+  (loop for resource being the hash-values of (resources scene)
+        do (free-resource resource))
+  (clrhash (resources scene)))
 
 (defmethod render (renderer (scene scene) &key &allow-other-keys)
   (run-renderer-system renderer (entities scene) :camera (camera scene)))
 
-(defgeneric quit (scene on-quit-window))
-
-(defmethod quit ((scene scene) on-quit-window)
-  (unload scene)
-  (funcall on-quit-window))
+(defmethod render :after (renderer (scene scene) &key &allow-other-keys)
+  (when (pausedp scene)
+    (sdl2:set-render-draw-color renderer 0 0 0 100)
+    (sdl2:render-fill-rect renderer (sdl2:make-rect 0 0 (w scene) (h scene)))))

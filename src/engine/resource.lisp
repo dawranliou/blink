@@ -1,11 +1,10 @@
 (in-package #:blink)
 
-(defvar *resources* (make-hash-table))
-
 (defclass resource () ())
 
-(defun load-resource (filename &rest all-keys &key type &allow-other-keys)
-  (symbol-macrolet ((resource (gethash key *resources*)))
+(defun load-resource (resource-pool filename
+                      &rest all-keys &key type &allow-other-keys)
+  (symbol-macrolet ((resource (gethash key resource-pool)))
     (let ((key (alexandria:make-keyword
                 (alexandria:symbolicate filename (format nil "~a" all-keys)))))
       (when (not resource)

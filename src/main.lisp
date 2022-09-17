@@ -20,15 +20,19 @@
 
 ;;; Title Scene
 
-(defclass title-scene (scene) ())
+(defclass title-scene (scene)
+  ()
+  (:default-initargs
+   :w +width+
+   :h +height+))
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "Z" keys)
     (transition-to-scene *window* (make-level 'A))))
 
 (defmethod render (renderer (title-scene title-scene) &key)
-  (let ((title-font (make-font :size 64))
-        (small-font (make-font :size 24)))
+  (let ((title-font (make-font (resources title-scene) :size 64))
+        (small-font (make-font (resources title-scene) :size 24)))
     (text renderer "Spirited" 100 200 :font title-font)
     (text renderer "Act. 2" 100 260 :font title-font)
     (when (zerop (mod (floor (frames *window*) 20) 2))
@@ -69,6 +73,8 @@
                               (player-flip nil)
                               (player-animation :idle))
   (make-instance 'level-scene
+                 :w +width+ :h +height+
+                 :on-quitting (lambda () (kit.sdl2:close-window *window*))
                  :room-sym room-sym
                  :tiles (room->tiles room-sym)
                  :player-init-animation player-animation
