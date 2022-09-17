@@ -9,6 +9,7 @@
    (trans-alpha :accessor trans-alpha :initform 0.0)
    (trans-fade-out-p :accessor trans-fade-out-p :initform nil)
    (trans-to-scene :accessor trans-to-scene :initform nil)
+   (keys-prev :accessor keys-prev :initform (make-hash-table :test 'equal))
    (keys :accessor keys :initform (make-hash-table :test 'equal))))
 
 (defun transition-to-scene (game-window scene &key (alpha 0.0))
@@ -74,12 +75,17 @@
       (setf frames 0)))
   (when (transp window)
     (update-transition window))
-  (with-slots (frames renderer scene keys) window
+  (with-slots (frames renderer scene keys keys-prev) window
     (sdl2:set-render-draw-color renderer 0 0 0 255)
     (sdl2:render-clear renderer)
     (unless (transp window)
-      (update scene :keys keys))
-    (render renderer scene)))
+      (update scene :keys keys :keys-prev keys-prev))
+    (render renderer scene)
+    ;; Record current frame's keys state to the prev key state table
+    (loop :for k
+            :being :the :hash-key
+              :using (hash-value v) :of keys
+          :do (setf (gethash k keys-prev) v))))
 
 (defun game-window-rect (window)
   (multiple-value-bind (w h) (kit.sdl2:window-size window)
@@ -102,17 +108,10 @@
 
 (defmethod kit.sdl2:keyboard-event
     ((window game-window) state ts repeat-p keysym)
-  (with-slots (scene keys) window
-    (let ((scancode (sdl2:scancode keysym)))
+  (with-slots (scene keys keys-prev) window
+    (let ((key-name (sdl2:scancode-name (sdl2:scancode keysym))))
+      ;; (format t "~A ~S ~S~%" state key-name repeat-p)
       (unless repeat-p
-        ;; (format t "~A ~S ~S~%" state scancode (sdl2:scancode-name scancode))
         (case state
-          (:keyup (setf (gethash (sdl2:scancode-name scancode) keys) nil))
-          (:keydown (setf (gethash (sdl2:scancode-name scancode) keys) t)))))))
-
-(defmethod kit.sdl2:keyboard-event :after
-    ((window game-window) state ts repeat-p keysym)
-  (let ((scancode (sdl2:scancode keysym)))
-    (when (eq :scancode-escape scancode)
-      (with-slots (scene) window
-        (setf (pausedp scene) t)))))
+          (:keyup (setf (gethash key-name keys) nil))
+          (:keydown (setf (gethash key-name keys) t)))))))

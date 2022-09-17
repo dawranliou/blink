@@ -37,18 +37,19 @@
 
 (defmethod update (obj &key &allow-other-keys))
 
-(defmethod update :before ((scene scene) &key &allow-other-keys)
+(defmethod update :around ((scene scene) &key keys keys-prev &allow-other-keys)
+  (when (quit-confirmed-p scene)
+    (unload scene)
+    (funcall (on-quitting scene)))
   (with-slots (dt last-tick-time) scene
     (let ((current-tick-time (sdl2:get-ticks)))
       (unless last-tick-time
         (setf last-tick-time current-tick-time))
       (setf dt (- current-tick-time last-tick-time)
-            last-tick-time current-tick-time))))
-
-(defmethod update :around ((scene scene) &key &allow-other-keys)
-  (when (quit-confirmed-p scene)
-    (unload scene)
-    (funcall (on-quitting scene)))
+            last-tick-time current-tick-time)))
+  (when (and (not (gethash "Escape" keys-prev))
+             (gethash "Escape" keys))
+    (setf (pausedp scene) (not (pausedp scene))))
   (unless (pausedp scene)
     (call-next-method)))
 
