@@ -81,7 +81,11 @@
   (clrhash (resources scene)))
 
 (defmethod render (renderer (scene scene) &key &allow-other-keys)
-  (run-renderer-system renderer (entities scene) :camera (camera scene)))
+  (run-renderer-system renderer
+                       (entities scene)
+                       :camera (camera scene)
+                       :w (w scene)
+                       :h (h scene)))
 
 (defmethod render :after (renderer (scene scene) &key &allow-other-keys)
   (when (pausedp scene)

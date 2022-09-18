@@ -2,7 +2,7 @@
 
 (defvar *npcs* (make-hash-table))
 
-(defclass npc (sprite animator interactable) ())
+(defclass npc (sprite animator conversable) ())
 
 (defun make-npc (tex npc-id x y &key (w 64) (h 64) active-sprite interact-sprite)
   (let ((npc (make-instance 'npc

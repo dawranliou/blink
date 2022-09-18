@@ -73,6 +73,8 @@
   ((room-sym :initarg :room-sym :accessor room-sym)
    (tiles :initarg :tiles :accessor tiles)
    (portals :initarg :portals :accessor portals)
+   ;; Conversations
+   (in-conversation-p :accessor in-conversation-p :initform nil)
    ;; Somewhere around the top-left corner
    (player-init-animation :initarg :player-init-animation
                           :accessor player-init-animation
@@ -143,11 +145,6 @@
                        renderer
                        (relative-path #P"assets/objects.png")))
 
-  (setf *bg-tex* (load-texture-from-file
-                  renderer
-                  (relative-path #P"assets/bg.png")))
-  (add-tiles-to-scene level-scene (tiles level-scene))
-
   (setf *player-tex* (load-texture-from-file
                       renderer
                       (relative-path #P"assets/player.png")))
@@ -173,7 +170,12 @@
                                                    (sdl2:make-rect 0 0 16 16)
                                                    (+ 640 16)
                                                    (- 768 32)
-                                                   32 32))))
+                                                   32 32)))
+
+  (setf *bg-tex* (load-texture-from-file
+                  renderer
+                  (relative-path #P"assets/bg.png")))
+  (add-tiles-to-scene level-scene (tiles level-scene)))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)
   (setf *player-tex* nil)

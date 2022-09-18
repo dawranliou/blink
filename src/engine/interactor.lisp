@@ -36,3 +36,15 @@
                                       32)))
             (apply #'sdl2:set-render-draw-color renderer +white+)
             (sdl2:render-draw-rect renderer rect))))))
+
+(defclass conversable (interactable)
+  ((current-conversation :accessor current-conversation :initform nil)
+   (conversations :accessor conversations :initform nil)))
+
+(defmethod render :after (renderer (obj conversable) &key w)
+  (when (interactp obj)
+    ;; Dialog box
+    (sdl2:set-render-draw-color renderer 0 0 0 200)
+    (sdl2:render-fill-rect renderer (sdl2:make-rect 20 20 (- w 40) 200))
+    (sdl2:set-render-draw-color renderer 255 255 255 255)
+    (sdl2:render-draw-rect renderer (sdl2:make-rect 20 20 (- w 40) 200))))
