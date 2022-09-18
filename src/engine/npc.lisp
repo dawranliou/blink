@@ -4,7 +4,8 @@
 
 (defclass npc (sprite animator conversable) ())
 
-(defun make-npc (tex npc-id x y &key (w 64) (h 64) active-sprite interact-sprite)
+(defun make-npc (tex npc-id x y &key (w 64) (h 64) active-sprite interact-sprite
+                                  conversations)
   (let ((npc (make-instance 'npc
                             :tex tex
                             :rect (sdl2:make-rect 0 (* npc-id 16) 16 16)
@@ -14,6 +15,9 @@
       (setf (active-sprite npc) active-sprite))
     (when interact-sprite
       (setf (interact-sprite npc) interact-sprite))
+    (when conversations
+      (setf (conversations npc) conversations
+            (conversation-idx npc) 0))
     (with-slots (animations) npc
       (setf (gethash :idle animations)
             (list (sdl2:make-rect 0 0 16 16)

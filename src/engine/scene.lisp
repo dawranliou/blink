@@ -85,7 +85,8 @@
                        (entities scene)
                        :camera (camera scene)
                        :w (w scene)
-                       :h (h scene)))
+                       :h (h scene)
+                       :resource-pool (resources scene)))
 
 (defmethod render :after (renderer (scene scene) &key &allow-other-keys)
   (when (pausedp scene)

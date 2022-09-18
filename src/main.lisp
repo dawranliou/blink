@@ -158,19 +158,22 @@
   (setf *npc-tex* (load-texture-from-file
                    renderer
                    (relative-path #P"assets/npcs.png")))
-  (add-to-scene level-scene (make-npc *npc-tex* 0 640 768
-                                      :active-sprite
-                                      (make-sprite *objects-tex*
-                                                   (sdl2:make-rect 16 0 16 16)
-                                                   (+ 640 16)
-                                                   (- 768 32)
-                                                   32 32)
-                                      :interact-sprite
-                                      (make-sprite *objects-tex*
-                                                   (sdl2:make-rect 0 0 16 16)
-                                                   (+ 640 16)
-                                                   (- 768 32)
-                                                   32 32)))
+  (add-to-scene level-scene
+                (make-npc *npc-tex* 0 640 768
+                          :active-sprite
+                          (make-sprite *objects-tex*
+                                       (sdl2:make-rect 16 0 16 16)
+                                       (+ 640 16)
+                                       (- 768 32)
+                                       32 32)
+                          :interact-sprite
+                          (make-sprite *objects-tex*
+                                       (sdl2:make-rect 0 0 16 16)
+                                       (+ 640 16)
+                                       (- 768 32)
+                                       32 32)
+                          :conversations
+                          '("Howdy!")))
 
   (setf *bg-tex* (load-texture-from-file
                   renderer
