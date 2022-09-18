@@ -24,9 +24,9 @@
 
 (defun text (renderer text-string x y &key w h font resource-pool)
   (let* ((font-pointer (pointer (or font (make-font resource-pool))))
-         (surface (sdl2-ttf:render-text-solid font-pointer
-                                              text-string
-                                              255 255 255 0))
+         (surface (sdl2-ttf:render-text-blended font-pointer
+                                                text-string
+                                                255 255 255 0))
          (texture (sdl2:create-texture-from-surface renderer surface))
          (destination-rect
            (sdl2:make-rect x y
@@ -39,7 +39,7 @@
 
 (defun make-text-texture (renderer text-string &key font resource-pool)
   (let* ((font-pointer (pointer (or font (make-font resource-pool))))
-         (surface (sdl2-ttf:render-text-solid font-pointer
-                                              text-string
-                                              255 255 255 0)))
+         (surface (sdl2-ttf:render-text-blended font-pointer
+                                                text-string
+                                                255 255 255 0)))
     (sdl2:create-texture-from-surface renderer surface)))
