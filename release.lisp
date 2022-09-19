@@ -21,6 +21,14 @@
 (deploy:define-library cl-opengl-bindings::opengl
   :path "/opt/X11/lib/libgl.dylib")
 
+#+darwin
+(deploy::define-hook (:build sort-foreign-libraries) ()
+  ;; Pretend to sort the list but this is just to ensure LIBSDL2 is loaded
+  ;; before LIBSDL2-TTF and LIBSDL2-IMAGE
+  (let ((sorted-libraries (reverse deploy::*foreign-libraries-to-reload*)))
+    (setf deploy::*foreign-libraries-to-reload* sorted-libraries)
+    (deploy::status 1 "Sorted libraries: ~A" sorted-libraries)))
+
 (deploy:define-resource-directory assets "assets/")
 
 (asdf:make :blink)

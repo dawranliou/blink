@@ -6,4 +6,4 @@ release:
 	sbcl --noinform --non-interactive --load release.lisp
 
 clean:
-	rm ./bin
+	rm -rf ./bin
