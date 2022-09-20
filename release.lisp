@@ -35,6 +35,7 @@
                         "libXext"
                         "libglapi"
                         "libxcb"
+                        "libXau"
                         "libxcb-glx")
 
   (deploy::define-hook (:build sort-foreign-libraries) ()
