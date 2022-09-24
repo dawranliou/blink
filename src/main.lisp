@@ -117,10 +117,10 @@
 
 (defun transition-room (from-room to-room)
   (case (intern (format nil "~A->~A" from-room to-room) "KEYWORD")
-    (:A->B (list (* 1 +sprite-size+) (* 14 +sprite-size+) nil))
-    (:A->C (list (* 1 +sprite-size+) (* 4 +sprite-size+) nil))
-    (:B->A (list (* 22 +sprite-size+) (* 6 +sprite-size+) '(:horizontal)))
-    (:C->A (list (* 22 +sprite-size+) (* 24 +sprite-size+) '(:horizontal)))))
+    (:A->B (list (* 1 +sprite-size+) (+ 12 (* 14 +sprite-size+)) nil))
+    (:A->C (list (* 1 +sprite-size+) (+ 12 (* 4 +sprite-size+)) nil))
+    (:B->A (list (* 22 +sprite-size+) (+ 12 (* 6 +sprite-size+)) '(:horizontal)))
+    (:C->A (list (* 22 +sprite-size+) (+ 12 (* 24 +sprite-size+)) '(:horizontal)))))
 
 (defmethod init ((level-scene level-scene) &key renderer)
   (setf (camera level-scene)

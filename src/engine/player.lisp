@@ -8,30 +8,30 @@
 (defun make-player (tex x y &key (current-animation :idle))
   (let ((player (make-instance 'player
                                :tex tex
-                               :rect (sdl2:make-rect 0 0 16 16)
+                               :rect (sdl2:make-rect 3 3 9 13)
                                :x x :y y
-                               :h 64
-                               :w 64
+                               :h 52
+                               :w 36
                                :current-animation current-animation)))
     (with-slots (animations) player
       (setf (gethash :idle animations)
-            (list (sdl2:make-rect 0 0 16 16)
-                  (sdl2:make-rect 0 0 16 16)
-                  (sdl2:make-rect 16 0 16 16)
-                  (sdl2:make-rect 16 0 16 16)
-                  (sdl2:make-rect 0 0 16 16)
-                  (sdl2:make-rect 0 0 16 16)
-                  (sdl2:make-rect 16 0 16 16)
-                  (sdl2:make-rect 16 0 16 16)))
+            (list (sdl2:make-rect 3 3 9 13)
+                  (sdl2:make-rect 3 3 9 13)
+                  (sdl2:make-rect 19 3 9 13)
+                  (sdl2:make-rect 19 3 9 13)
+                  (sdl2:make-rect 3 3 9 13)
+                  (sdl2:make-rect 3 3 9 13)
+                  (sdl2:make-rect 19 3 9 13)
+                  (sdl2:make-rect 19 3 9 13)))
       (setf (gethash :run animations)
-            (list (sdl2:make-rect 0 16 16 16)
-                  (sdl2:make-rect 16 16 16 16)
-                  (sdl2:make-rect 0 16 16 16)
-                  (sdl2:make-rect 16 16 16 16)
-                  (sdl2:make-rect 0 16 16 16)
-                  (sdl2:make-rect 16 16 16 16)
-                  (sdl2:make-rect 0 16 16 16)
-                  (sdl2:make-rect 16 16 16 16))))
+            (list (sdl2:make-rect 3 19 9 13)
+                  (sdl2:make-rect 19 19 9 13)
+                  (sdl2:make-rect 3 19 9 13)
+                  (sdl2:make-rect 19 19 9 13)
+                  (sdl2:make-rect 3 19 9 13)
+                  (sdl2:make-rect 19 19 9 13)
+                  (sdl2:make-rect 3 19 9 13)
+                  (sdl2:make-rect 19 19 9 13))))
     player))
 
 (defun player-move (player &key (x 0) (y 0))
