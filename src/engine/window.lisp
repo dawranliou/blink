@@ -6,6 +6,7 @@
 (defclass game-window (kit.sdl2:window)
   ((renderer :initform nil :reader renderer)
    (scene :accessor scene)
+   (resources :accessor resources :initform (make-hash-table))
    ;; Scene transitioning
    (transp :accessor transp :initform nil)
    (trans-alpha :accessor trans-alpha :initform 0.0)
@@ -52,6 +53,7 @@
                scene
                trans-to-scene
                transp
+               resources
                renderer)
       game-window
     (if trans-fade-out-p
@@ -65,26 +67,28 @@
         (progn
           (incf trans-alpha 0.05)
           (when (< 1.01 trans-alpha)
-            (unload scene)
-            (init trans-to-scene :renderer renderer)
+            (with-resource-pool resources
+              (unload scene)
+              (init trans-to-scene :renderer renderer))
             (setf scene trans-to-scene
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (with-slots (renderer scene keys keys-prev) window
+  (with-slots (renderer resources scene keys keys-prev) window
     (with-renderer renderer
-      (when (transp window)
-        (update-transition window))
-      (sdl2:set-render-draw-color renderer 0 0 0 255)
-      (sdl2:render-clear renderer)
-      (unless (transp window)
-        (update scene :keys keys :keys-prev keys-prev))
-      (render scene)
-      ;; Record current rendering cycle's keys state to the prev key state table
-      (loop :for k
-              :being :the :hash-key
-                :using (hash-value v) :of keys
-            :do (setf (gethash k keys-prev) v)))))
+      (with-resource-pool resources
+        (when (transp window)
+          (update-transition window))
+        (sdl2:set-render-draw-color renderer 0 0 0 255)
+        (sdl2:render-clear renderer)
+        (unless (transp window)
+          (update scene :keys keys :keys-prev keys-prev))
+        (render scene)
+        ;; Record current rendering cycle's keys state to the prev key state table
+        (loop :for k
+                :being :the :hash-key
+                  :using (hash-value v) :of keys
+              :do (setf (gethash k keys-prev) v))))))
 
 (defun game-window-rect (window)
   (multiple-value-bind (w h) (kit.sdl2:window-size window)

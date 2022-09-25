@@ -39,7 +39,7 @@
   ((conversation-idx :accessor conversation-idx :initform nil)
    (conversations :accessor conversations :initform nil)))
 
-(defmethod render :after ((obj conversable) &key w resource-pool)
+(defmethod render :after ((obj conversable) &key w)
   (when (interactp obj)
     ;; Dialog box
     (render-fill-rect (sdl2:make-rect 20 20 (- w 40) 160) :color (rgb 0 0 0 0.8))
@@ -51,5 +51,4 @@
                  (sdl2:make-rect 40 40 120 120)
                  :src-rect (sdl2:make-rect 2 3 10 10))
 
-    (text (nth (conversation-idx obj) (conversations obj)) 180 40
-          :resource-pool resource-pool)))
+    (text (nth (conversation-idx obj) (conversations obj)) 180 40)))

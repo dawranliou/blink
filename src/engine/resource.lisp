@@ -10,9 +10,9 @@
 
 (defun load-resource (filename
                       &rest all-keys
-                      &key type (resource-pool *resources*)
+                      &key type resource-pool
                       &allow-other-keys)
-  (symbol-macrolet ((resource (gethash key resource-pool)))
+  (symbol-macrolet ((resource (gethash key (or resource-pool *resources*))))
     (let ((key (alexandria:make-keyword
                 (alexandria:symbolicate filename (format nil "~a" all-keys)))))
       (when (not resource)
@@ -31,6 +31,11 @@
 (defmethod free-resource :around (resource)
   (when resource
     (call-next-method)))
+
+(defun free-all-resources ()
+  (loop for resource being the hash-values of *resources*
+        do (free-resource resource))
+  (clrhash *resources*))
 
 (defun relative-path (path)
   (format nil "~a" (asdf:system-relative-pathname 'blink path)))

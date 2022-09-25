@@ -17,14 +17,12 @@
 (defmethod free-resource ((font font))
   (sdl2-ttf:close-font (pointer font)))
 
-(defun make-font (resource-pool
-                  &key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
+(defun make-font (&key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
   (let ((filename (relative-path filename)))
-    (load-resource filename :type :font :size size
-                            :resource-pool resource-pool)))
+    (load-resource filename :type :font :size size)))
 
-(defun text (text-string x y &key w h font resource-pool)
-  (let* ((font-pointer (pointer (or font (make-font resource-pool))))
+(defun text (text-string x y &key w h font)
+  (let* ((font-pointer (pointer (or font (make-font))))
          (surface (sdl2-ttf:render-text-blended font-pointer
                                                 text-string
                                                 255 255 255 0))
@@ -35,8 +33,8 @@
                            (or h (sdl2:texture-height texture)))))
     (render-copy texture destination-rect)))
 
-(defun make-text-texture (text-string &key font resource-pool)
-  (let* ((font-pointer (pointer (or font (make-font resource-pool))))
+(defun make-text-texture (text-string &key font)
+  (let* ((font-pointer (pointer (or font (make-font))))
          (surface (sdl2-ttf:render-text-blended font-pointer
                                                 text-string
                                                 255 255 255 0)))

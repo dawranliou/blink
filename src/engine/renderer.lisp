@@ -10,11 +10,9 @@
   (:method (thing &key camera &allow-other-keys)
     nil))
 
-(defun run-renderer-system (entities &key camera w h resource-pool)
+(defun run-renderer-system (entities &key camera w h)
   (loop :for entity :in entities
-        :do (render entity :camera camera
-                           :w w :h h
-                           :resource-pool resource-pool)))
+        :do (render entity :camera camera :w w :h h)))
 
 (defun create-texture-from-surface (surface)
   (sdl2:create-texture-from-surface *renderer* surface))

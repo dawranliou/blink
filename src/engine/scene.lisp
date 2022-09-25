@@ -4,7 +4,6 @@
   ((last-tick-time :accessor last-tick-time :initform nil)
    (w :accessor w :initarg :w)
    (h :accessor h :initarg :h)
-   (resources :accessor resources :initform (make-hash-table))
    (entities :accessor entities :initform ())
    (frames :initform 0 :accessor frames)
    (dt :accessor dt :initform 0)
@@ -76,16 +75,13 @@
 
 (defmethod unload ((scene scene) &key &allow-other-keys)
   (remove-all-entities-from-scene scene)
-  (loop for resource being the hash-values of (resources scene)
-        do (free-resource resource))
-  (clrhash (resources scene)))
+  (free-all-resources))
 
 (defmethod render ((scene scene) &key &allow-other-keys)
   (run-renderer-system (entities scene)
                        :camera (camera scene)
                        :w (w scene)
-                       :h (h scene)
-                       :resource-pool (resources scene)))
+                       :h (h scene)))
 
 (defmethod render :after ((scene scene) &key &allow-other-keys)
   (when (pausedp scene)
@@ -97,9 +93,7 @@
     (render-fill-rect (sdl2:make-rect 100 100 (- (w scene) 200) (- (h scene) 200))
                       :color '(0 0 0 200))
 
-    (text ">"
-          125 (+ 150 (* (pause-menu-selected scene) 50))
-          :resource-pool (resources scene))
+    (text ">" 125 (+ 150 (* (pause-menu-selected scene) 50)))
     (loop :for menu-item :in (pause-menu-items scene)
           :for y = 150 :then (incf y 50)
           :for dest-rect = (sdl2:make-rect 150 y

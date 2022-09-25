@@ -34,8 +34,8 @@
     (transition-to-scene *window* (make-level 'A))))
 
 (defmethod render ((title-scene title-scene) &key)
-  (let ((title-font (make-font (resources title-scene) :size 64))
-        (small-font (make-font (resources title-scene) :size 24)))
+  (let ((title-font (make-font :size 64))
+        (small-font (make-font :size 24)))
     (text "Spirited" 100 200 :font title-font)
     (text "Act. 2" 100 260 :font title-font)
     (when (zerop (mod (floor (frames title-scene) 20) 2))
@@ -53,10 +53,9 @@
     (transition-to-scene *window* (make-title-scene))))
 
 (defmethod render ((end-scene end-scene) &key)
-  (text "The End" 100 200 :resource-pool (resources end-scene))
+  (text "The End" 100 200)
   (when (zerop (mod (floor (frames end-scene) 20) 2))
-    (text "Press <X> to restart" 100 350
-          :resource-pool (resources end-scene))))
+    (text "Press <X> to restart" 100 350)))
 
 ;;; Level Scene
 
