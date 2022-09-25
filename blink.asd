@@ -30,6 +30,7 @@
                              (:file "interactor")
                              (:file "scene")
                              (:file "entity")
+                             (:file "sprite")
                              (:file "tile")
                              (:file "animator")
                              (:file "player")

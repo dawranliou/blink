@@ -1,10 +1,5 @@
 (in-package #:blink)
 
-(defvar *debug* nil)
-
-;; (setf *debug* t)
-;; (setf *debug* nil)
-
 (defclass entity ()
   ((entity-id :reader entity-id :initform (gensym "ENTITY-ID-"))))
 
@@ -24,7 +19,7 @@
   (print-unreadable-object (rect stream :type t)
     (format stream "{~A,~A}" (x rect) (y rect))))
 
-(defun make-rect (x y &key (w +sprite-size+) (h +sprite-size+))
+(defun make-rect (x y w h)
   (make-instance 'rect :x x :y y :w w :h h))
 
 (defclass velocity ()
@@ -52,26 +47,3 @@
                          (sdl2:make-rect (- x (x camera)) (- y (y camera)) w h)
                          (sdl2:make-rect x y w h))))
       (sdl2:render-draw-rect renderer dest-rect))))
-
-(defclass sprite (entity rect color texture) ())
-
-(defun make-sprite (tex rect x y w h &key color)
-  (make-instance 'sprite :tex tex :rect rect :x x :y y :w w :h h :color color))
-
-(defmethod render (renderer (sprite sprite) &key camera)
-  (with-slots (tex rect flip x y w h color) sprite
-    (let ((dest-rect (if camera
-                         (sdl2:make-rect (- x (x camera)) (- y (y camera)) w h)
-                         (sdl2:make-rect x y w h))))
-      (when *debug*
-        (apply #'sdl2:set-render-draw-color renderer (or color +gray-50+))
-        (sdl2:render-draw-rect renderer dest-rect))
-      (when color
-        (destructuring-bind (r g b _a) color
-          (declare (ignore _a))
-          (sdl2:set-texture-color-mod (texture tex) r g b)))
-      (sdl2:render-copy-ex renderer
-                           (texture tex)
-                           :source-rect rect
-                           :dest-rect dest-rect
-                           :flip flip))))

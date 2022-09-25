@@ -3,7 +3,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CONSTANTS
 
-(defparameter +sprite-size+ 32)
 (defparameter +width+ (* +sprite-size+ 20))
 (defparameter +height+ (* +sprite-size+ 18))
 
@@ -207,7 +206,7 @@
     ;; update player state
     (with-slots (x y w h groundedp) *player*
       (setf groundedp
-            (collide-with-tile-at-rect tiles (make-rect x (+ y 1) :w w :h h))))
+            (collide-with-tile-at-rect tiles (make-rect x (+ y 1) w h))))
 
     ;; update horizontal speed
     (cond

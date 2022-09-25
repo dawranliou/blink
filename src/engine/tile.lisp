@@ -36,7 +36,9 @@
 
 (defun rect-at (x y)
   (make-rect (* +sprite-size+ (floor x +sprite-size+))
-             (* +sprite-size+ (floor y +sprite-size+))))
+             (* +sprite-size+ (floor y +sprite-size+))
+             +sprite-size+
+             +sprite-size+))
 
 (defun solidp (tiles x y)
   (let ((x-idx (floor x +sprite-size+))
@@ -73,9 +75,9 @@
           :when (solidp tiles x y)
             :collect (rect-at x y))))
 
-;; (collide-with-tile-at-rect +room-a+ (make-rect 64 64))
-;; (collide-with-tile-at-rect +room-a+ (make-rect 64 63))
-;; (collide-with-tile-at-rect +room-a+ (make-rect 0 0))
+;; (collide-with-tile-at-rect +room-a+ (make-sprite-rect 64 64))
+;; (collide-with-tile-at-rect +room-a+ (make-sprite-rect 64 63))
+;; (collide-with-tile-at-rect +room-a+ (make-sprite-rect 0 0))
 
 (defun collide-with-portal (tiles rect)
   (with-slots (x y w h) rect
@@ -87,4 +89,4 @@
           :when portal-sym
             :collect portal-sym)))
 
-;; (collide-with-portal '((0 0 A)) (make-rect 64 0))
+;; (collide-with-portal '((0 0 A)) (make-sprite-rect 64 0))
