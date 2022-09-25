@@ -1,5 +1,8 @@
 (in-package #:blink)
 
+(defparameter +width+ (* +sprite-size+ 20))
+(defparameter +height+ (* +sprite-size+ 18))
+
 (defclass game-window (kit.sdl2:window)
   ((renderer :initform nil :reader renderer)
    (scene :accessor scene)
@@ -68,19 +71,20 @@
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (when (transp window)
-    (update-transition window))
   (with-slots (renderer scene keys keys-prev) window
-    (sdl2:set-render-draw-color renderer 0 0 0 255)
-    (sdl2:render-clear renderer)
-    (unless (transp window)
-      (update scene :keys keys :keys-prev keys-prev))
-    (render renderer scene)
-    ;; Record current rendering cycle's keys state to the prev key state table
-    (loop :for k
-            :being :the :hash-key
-              :using (hash-value v) :of keys
-          :do (setf (gethash k keys-prev) v))))
+    (with-renderer renderer
+      (when (transp window)
+        (update-transition window))
+      (sdl2:set-render-draw-color renderer 0 0 0 255)
+      (sdl2:render-clear renderer)
+      (unless (transp window)
+        (update scene :keys keys :keys-prev keys-prev))
+      (render scene)
+      ;; Record current rendering cycle's keys state to the prev key state table
+      (loop :for k
+              :being :the :hash-key
+                :using (hash-value v) :of keys
+            :do (setf (gethash k keys-prev) v)))))
 
 (defun game-window-rect (window)
   (multiple-value-bind (w h) (kit.sdl2:window-size window)

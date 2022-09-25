@@ -40,10 +40,9 @@
 (defun make-box-entity (x y w h color)
   (make-instance 'box :x x :y y :w w :h h :color color))
 
-(defmethod render (renderer (box box) &key camera)
+(defmethod render ((box box) &key camera)
   (with-slots (x y w h color) box
-    (apply #'sdl2:set-render-draw-color renderer color)
     (let ((dest-rect (if camera
                          (sdl2:make-rect (- x (x camera)) (- y (y camera)) w h)
                          (sdl2:make-rect x y w h))))
-      (sdl2:render-draw-rect renderer dest-rect))))
+      (render-draw-rect dest-rect :color color))))

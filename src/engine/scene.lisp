@@ -80,32 +80,24 @@
         do (free-resource resource))
   (clrhash (resources scene)))
 
-(defmethod render (renderer (scene scene) &key &allow-other-keys)
-  (run-renderer-system renderer
-                       (entities scene)
+(defmethod render ((scene scene) &key &allow-other-keys)
+  (run-renderer-system (entities scene)
                        :camera (camera scene)
                        :w (w scene)
                        :h (h scene)
                        :resource-pool (resources scene)))
 
-(defmethod render :after (renderer (scene scene) &key &allow-other-keys)
+(defmethod render :after ((scene scene) &key &allow-other-keys)
   (when (pausedp scene)
     ;; Background blurring overlay
-    (sdl2:set-render-draw-color renderer 0 0 0 100)
-    (sdl2:render-fill-rect renderer (sdl2:make-rect 0 0 (w scene) (h scene)))
+    (render-fill-rect (sdl2:make-rect 0 0 (w scene) (h scene))
+                      :color '(0 0 0 100))
 
     ;; Dialog box
-    (sdl2:set-render-draw-color renderer 0 0 0 200)
-    (sdl2:render-fill-rect renderer
-                           (sdl2:make-rect 100 100
-                                           (- (w scene) 200)
-                                           (- (h scene) 200)))
-    (sdl2:set-render-draw-color renderer 255 255 255 255)
-    (sdl2:render-draw-rect renderer (sdl2:make-rect 100
-                                                    100
-                                                    (- (w scene) 200)
-                                                    (- (h scene) 200)))
-    (text renderer ">"
+    (render-fill-rect (sdl2:make-rect 100 100 (- (w scene) 200) (- (h scene) 200))
+                      :color '(0 0 0 200))
+
+    (text ">"
           125 (+ 150 (* (pause-menu-selected scene) 50))
           :resource-pool (resources scene))
     (loop :for menu-item :in (pause-menu-items scene)
@@ -113,7 +105,4 @@
           :for dest-rect = (sdl2:make-rect 150 y
                                            (sdl2:texture-width menu-item)
                                            (sdl2:texture-height menu-item))
-          :do (sdl2:render-copy renderer
-                                menu-item
-                                :source-rect (cffi:null-pointer)
-                                :dest-rect dest-rect))))
+          :do (render-copy menu-item dest-rect))))

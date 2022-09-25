@@ -21,12 +21,11 @@
           :else :do (setf (activep obj) nil
                           (interactp obj) nil))))
 
-(defmethod render :after (renderer (obj interactable) &key camera)
+(defmethod render :after ((obj interactable) &key camera)
   (when (activep obj)
     (with-slots (x y active-sprite interactp interact-sprite) obj
       (if active-sprite
-          (render renderer
-                  (if (and interactp interact-sprite)
+          (render (if (and interactp interact-sprite)
                       interact-sprite
                       active-sprite)
                   :camera camera)
@@ -34,28 +33,23 @@
                                       (- y (y camera) 32)
                                       32
                                       32)))
-            (apply #'sdl2:set-render-draw-color renderer +white+)
-            (sdl2:render-draw-rect renderer rect))))))
+            (render-draw-rect rect :color +white+))))))
 
 (defclass conversable (interactable)
   ((conversation-idx :accessor conversation-idx :initform nil)
    (conversations :accessor conversations :initform nil)))
 
-(defmethod render :after (renderer (obj conversable) &key w resource-pool)
+(defmethod render :after ((obj conversable) &key w resource-pool)
   (when (interactp obj)
     ;; Dialog box
-    (sdl2:set-render-draw-color renderer 0 0 0 200)
-    (sdl2:render-fill-rect renderer (sdl2:make-rect 20 20 (- w 40) 160))
-    (sdl2:set-render-draw-color renderer 255 255 255 255)
-    (sdl2:render-draw-rect renderer (sdl2:make-rect 20 20 (- w 40) 160))
+    (render-fill-rect (sdl2:make-rect 20 20 (- w 40) 160) :color (rgb 0 0 0 0.8))
+    (render-draw-rect (sdl2:make-rect 20 20 (- w 40) 160) :color +white+)
 
     ;; Headshot
     ;; (sdl2:render-draw-rect renderer (sdl2:make-rect 40 40 120 120))
-    (sdl2:render-copy-ex renderer
-                         (texture (tex obj))
-                         :source-rect (sdl2:make-rect 2 3 10 10)
-                         :dest-rect (sdl2:make-rect 40 40 120 120)
-                         :flip nil)
+    (render-copy (texture (tex obj))
+                 (sdl2:make-rect 40 40 120 120)
+                 :src-rect (sdl2:make-rect 2 3 10 10))
 
-    (text renderer (nth (conversation-idx obj) (conversations obj)) 180 40
+    (text (nth (conversation-idx obj) (conversations obj)) 180 40
           :resource-pool resource-pool)))

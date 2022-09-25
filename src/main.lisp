@@ -1,12 +1,6 @@
 (in-package #:blink)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; CONSTANTS
-
-(defparameter +width+ (* +sprite-size+ 20))
-(defparameter +height+ (* +sprite-size+ 18))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GLOBAL STATES
 
 (defvar *window* nil)
@@ -28,26 +22,24 @@
 (defun make-title-scene ()
   (make-instance 'title-scene))
 
-(defmethod init ((title-scene title-scene) &key renderer &allow-other-keys)
+(defmethod init ((title-scene title-scene) &key &allow-other-keys)
   (setf (pause-menu-items title-scene)
-        (list (make-text-texture renderer
-                                 "Resume"
+        (list (make-text-texture "Resume"
                                  :resource-pool (resources title-scene))
-              (make-text-texture renderer
-                                 "Exit"
+              (make-text-texture "Exit"
                                  :resource-pool (resources title-scene)))))
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "X" keys)
     (transition-to-scene *window* (make-level 'A))))
 
-(defmethod render (renderer (title-scene title-scene) &key)
+(defmethod render ((title-scene title-scene) &key)
   (let ((title-font (make-font (resources title-scene) :size 64))
         (small-font (make-font (resources title-scene) :size 24)))
-    (text renderer "Spirited" 100 200 :font title-font)
-    (text renderer "Act. 2" 100 260 :font title-font)
+    (text "Spirited" 100 200 :font title-font)
+    (text "Act. 2" 100 260 :font title-font)
     (when (zerop (mod (floor (frames title-scene) 20) 2))
-      (text renderer "Press <X> to start" 100 350 :font small-font))))
+      (text "Press <X> to start" 100 350 :font small-font))))
 
 ;;; End Scene
 (defclass end-scene (scene)
@@ -60,10 +52,10 @@
   (when (gethash "X" keys)
     (transition-to-scene *window* (make-title-scene))))
 
-(defmethod render (renderer (end-scene end-scene) &key)
-  (text renderer "The End" 100 200 :resource-pool (resources end-scene))
+(defmethod render ((end-scene end-scene) &key)
+  (text "The End" 100 200 :resource-pool (resources end-scene))
   (when (zerop (mod (floor (frames end-scene) 20) 2))
-    (text renderer "Press <X> to restart" 100 350
+    (text "Press <X> to restart" 100 350
           :resource-pool (resources end-scene))))
 
 ;;; Level Scene
@@ -121,7 +113,7 @@
     (:B->A (list (* 22 +sprite-size+) (+ 12 (* 6 +sprite-size+)) '(:horizontal)))
     (:C->A (list (* 22 +sprite-size+) (+ 12 (* 24 +sprite-size+)) '(:horizontal)))))
 
-(defmethod init ((level-scene level-scene) &key renderer)
+(defmethod init ((level-scene level-scene) &key)
   (setf (camera level-scene)
         (make-bounded-camera (* (length (first (tiles level-scene)))
                                 +sprite-size+)
@@ -133,19 +125,15 @@
                        :y (player-init-y level-scene))
 
   (setf (pause-menu-items level-scene)
-        (list (make-text-texture renderer
-                                 "Resume"
+        (list (make-text-texture "Resume"
                                  :resource-pool (resources level-scene))
-              (make-text-texture renderer
-                                 "Exit"
+              (make-text-texture "Exit"
                                  :resource-pool (resources level-scene))))
 
   (setf *objects-tex* (load-texture-from-file
-                       renderer
                        (relative-path #P"assets/objects.png")))
 
   (setf *player-tex* (load-texture-from-file
-                      renderer
                       (relative-path #P"assets/player.png")))
   (setf *player* (make-player *player-tex*
                               (player-init-x level-scene)
@@ -155,7 +143,6 @@
   (add-to-scene level-scene *player*)
 
   (setf *npc-tex* (load-texture-from-file
-                   renderer
                    (relative-path #P"assets/npcs.png")))
   (add-to-scene level-scene
                 (make-npc *npc-tex* 0 640 768
@@ -175,7 +162,6 @@
                           '("Howdy!")))
 
   (setf *bg-tex* (load-texture-from-file
-                  renderer
                   (relative-path #P"assets/bg.png")))
   (add-tiles-to-scene level-scene (tiles level-scene)))
 

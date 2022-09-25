@@ -22,24 +22,21 @@
   (let ((filename (relative-path filename)))
     (load-resource resource-pool filename :type :font :size size)))
 
-(defun text (renderer text-string x y &key w h font resource-pool)
+(defun text (text-string x y &key w h font resource-pool)
   (let* ((font-pointer (pointer (or font (make-font resource-pool))))
          (surface (sdl2-ttf:render-text-blended font-pointer
                                                 text-string
                                                 255 255 255 0))
-         (texture (sdl2:create-texture-from-surface renderer surface))
+         (texture (create-texture-from-surface surface))
          (destination-rect
            (sdl2:make-rect x y
                            (or w (sdl2:texture-width texture))
                            (or h (sdl2:texture-height texture)))))
-    (sdl2:render-copy renderer
-                      texture
-                      :source-rect (cffi:null-pointer)
-                      :dest-rect destination-rect)))
+    (render-copy texture destination-rect)))
 
-(defun make-text-texture (renderer text-string &key font resource-pool)
+(defun make-text-texture (text-string &key font resource-pool)
   (let* ((font-pointer (pointer (or font (make-font resource-pool))))
          (surface (sdl2-ttf:render-text-blended font-pointer
                                                 text-string
                                                 255 255 255 0)))
-    (sdl2:create-texture-from-surface renderer surface)))
+    (create-texture-from-surface surface)))
