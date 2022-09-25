@@ -17,17 +17,12 @@
   ()
   (:default-initargs
    :w +width+
-   :h +height+))
+   :h +height+
+   :pause-menu-items (list (make-text-texture "Resume")
+                           (make-text-texture "Exit"))))
 
 (defun make-title-scene ()
   (make-instance 'title-scene))
-
-(defmethod init ((title-scene title-scene) &key &allow-other-keys)
-  (setf (pause-menu-items title-scene)
-        (list (make-text-texture "Resume"
-                                 :resource-pool (resources title-scene))
-              (make-text-texture "Exit"
-                                 :resource-pool (resources title-scene)))))
 
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "X" keys)
@@ -46,7 +41,9 @@
   ()
   (:default-initargs
    :w +width+
-   :h +height+))
+   :h +height+
+   :pause-menu-items (list (make-text-texture "Resume")
+                           (make-text-texture "Exit"))))
 
 (defmethod update ((end-scene end-scene) &key keys &allow-other-keys)
   (when (gethash "X" keys)
@@ -80,7 +77,9 @@
                   :initform (* 4 +sprite-size+)))
   (:default-initargs
    :w +width+
-   :h +height+))
+   :h +height+
+   :pause-menu-items (list (make-text-texture "Resume")
+                           (make-text-texture "Exit"))))
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)
@@ -122,12 +121,6 @@
   (center-scene-camera level-scene
                        :x (player-init-x level-scene)
                        :y (player-init-y level-scene))
-
-  (setf (pause-menu-items level-scene)
-        (list (make-text-texture "Resume"
-                                 :resource-pool (resources level-scene))
-              (make-text-texture "Exit"
-                                 :resource-pool (resources level-scene))))
 
   (setf *objects-tex* (load-texture-from-file
                        (relative-path #P"assets/objects.png")))
