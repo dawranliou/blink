@@ -1,9 +1,17 @@
 (in-package #:blink)
 
+(defvar *resources*)
+
+(defmacro with-resource-pool (resource-pool &body body)
+  `(let ((*resources* ,resource-pool))
+     ,@body))
+
 (defclass resource () ())
 
-(defun load-resource (resource-pool filename
-                      &rest all-keys &key type &allow-other-keys)
+(defun load-resource (filename
+                      &rest all-keys
+                      &key type (resource-pool *resources*)
+                      &allow-other-keys)
   (symbol-macrolet ((resource (gethash key resource-pool)))
     (let ((key (alexandria:make-keyword
                 (alexandria:symbolicate filename (format nil "~a" all-keys)))))

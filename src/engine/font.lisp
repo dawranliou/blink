@@ -20,7 +20,8 @@
 (defun make-font (resource-pool
                   &key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
   (let ((filename (relative-path filename)))
-    (load-resource resource-pool filename :type :font :size size)))
+    (load-resource filename :type :font :size size
+                            :resource-pool resource-pool)))
 
 (defun text (text-string x y &key w h font resource-pool)
   (let* ((font-pointer (pointer (or font (make-font resource-pool))))
