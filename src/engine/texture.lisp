@@ -1,6 +1,6 @@
 (in-package #:blink)
 
-(defclass tex ()
+(defclass tex (resource)
   ((w :accessor w :initform 0)
    (h :accessor h :initform 0)
    (texture :accessor texture :initform nil)))
@@ -18,3 +18,6 @@
         (setf texture (create-texture-from-surface surface))
         (sdl2:free-surface surface)))
     tex))
+
+(defmethod free-resource ((tex tex))
+  (sdl2:destroy-texture (texture tex)))
