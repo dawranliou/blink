@@ -18,8 +18,7 @@
   (:default-initargs
    :w +width+
    :h +height+
-   :pause-menu-items (list (make-text-texture "Resume")
-                           (make-text-texture "Exit"))))
+   :pause-menu-items '("Resume" "Exit")))
 
 (defun make-title-scene ()
   (make-instance 'title-scene))
@@ -42,8 +41,7 @@
   (:default-initargs
    :w +width+
    :h +height+
-   :pause-menu-items (list (make-text-texture "Resume")
-                           (make-text-texture "Exit"))))
+   :pause-menu-items '("Resume" "Exit")))
 
 (defmethod update ((end-scene end-scene) &key keys &allow-other-keys)
   (when (gethash "X" keys)
@@ -78,8 +76,7 @@
   (:default-initargs
    :w +width+
    :h +height+
-   :pause-menu-items (list (make-text-texture "Resume")
-                           (make-text-texture "Exit"))))
+   :pause-menu-items '("Resume" "Exit")))
 
 (defmethod print-object ((level-scene level-scene) stream)
   (print-unreadable-object (level-scene stream :type t)

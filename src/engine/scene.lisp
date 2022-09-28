@@ -95,8 +95,9 @@
 
     (text ">" 125 (+ 150 (* (pause-menu-selected scene) 50)))
     (loop :for menu-item :in (pause-menu-items scene)
+	  :for menu-text = (make-text-texture menu-item)
           :for y = 150 :then (incf y 50)
           :for dest-rect = (sdl2:make-rect 150 y
-                                           (sdl2:texture-width menu-item)
-                                           (sdl2:texture-height menu-item))
-          :do (render-copy menu-item dest-rect))))
+                                           (sdl2:texture-width menu-text)
+                                           (sdl2:texture-height menu-text))
+          :do (render-copy menu-text dest-rect))))
