@@ -41,6 +41,8 @@
       (sdl2:destroy-renderer renderer))))
 
 (defmethod kit.sdl2:close-window :after ((window game-window))
+  (with-resource-pool (resources window)
+    (free-all-resources))
   (sdl2-ttf:quit)
   (kit.sdl2:quit))
 

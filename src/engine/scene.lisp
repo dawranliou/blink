@@ -74,8 +74,7 @@
 (defgeneric unload (scene &key &allow-other-keys))
 
 (defmethod unload ((scene scene) &key &allow-other-keys)
-  (remove-all-entities-from-scene scene)
-  (free-all-resources))
+  (remove-all-entities-from-scene scene))
 
 (defmethod render ((scene scene) &key &allow-other-keys)
   (run-renderer-system (entities scene)

@@ -158,10 +158,6 @@
                   :type :image))
   (add-tiles-to-scene level-scene (tiles level-scene)))
 
-(defmethod unload ((level-scene level-scene) &key &allow-other-keys)
-  (setf *player-tex* nil)
-  (setf *bg-tex* nil))
-
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt tiles) level-scene
     ;; Portal player to room
