@@ -5,10 +5,10 @@
    (h :accessor h :initform 0)
    (texture :accessor texture :initform nil)))
 
-(defun load-texture-from-file (pathname)
+(defmethod load-typed-resource (filename (type (eql :image)) &key &allow-other-keys)
   (let ((tex (make-instance 'tex)))
     (with-slots (texture w h) tex
-      (let ((surface (sdl2-image:load-image pathname)))
+      (let ((surface (sdl2-image:load-image filename)))
         (setf w (sdl2:surface-width surface))
         (setf h (sdl2:surface-height surface))
         (sdl2:set-color-key surface

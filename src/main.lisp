@@ -119,11 +119,13 @@
                        :x (player-init-x level-scene)
                        :y (player-init-y level-scene))
 
-  (setf *objects-tex* (load-texture-from-file
-                       (relative-path #P"assets/objects.png")))
+  (setf *objects-tex* (load-resource
+                       (relative-path #P"assets/objects.png")
+                       :type :image))
 
-  (setf *player-tex* (load-texture-from-file
-                      (relative-path #P"assets/player.png")))
+  (setf *player-tex* (load-resource
+                      (relative-path #P"assets/player.png")
+                      :type :image))
   (setf *player* (make-player *player-tex*
                               (player-init-x level-scene)
                               (player-init-y level-scene)))
@@ -131,8 +133,9 @@
   (setf (flip *player*) (player-init-flip level-scene))
   (add-to-scene level-scene *player*)
 
-  (setf *npc-tex* (load-texture-from-file
-                   (relative-path #P"assets/npcs.png")))
+  (setf *npc-tex* (load-resource
+                   (relative-path #P"assets/npcs.png")
+                   :type :image))
   (add-to-scene level-scene
                 (make-npc *npc-tex* 0 640 768
                           :active-sprite
@@ -150,8 +153,9 @@
                           :conversations
                           '("Howdy!")))
 
-  (setf *bg-tex* (load-texture-from-file
-                  (relative-path #P"assets/bg.png")))
+  (setf *bg-tex* (load-resource
+                  (relative-path #P"assets/bg.png")
+                  :type :image))
   (add-tiles-to-scene level-scene (tiles level-scene)))
 
 (defmethod unload ((level-scene level-scene) &key &allow-other-keys)

@@ -8,11 +8,8 @@
 
 (defclass resource () ())
 
-(defun load-resource (filename
-                      &rest all-keys
-                      &key type resource-pool
-                      &allow-other-keys)
-  (symbol-macrolet ((resource (gethash key (or resource-pool *resources*))))
+(defun load-resource (filename &rest all-keys &key type &allow-other-keys)
+  (symbol-macrolet ((resource (gethash key *resources*)))
     (let ((key (alexandria:make-keyword
                 (alexandria:symbolicate filename (format nil "~a" all-keys)))))
       (when (not resource)
