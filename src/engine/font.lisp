@@ -32,10 +32,3 @@
                            (or w (sdl2:texture-width texture))
                            (or h (sdl2:texture-height texture)))))
     (render-copy texture destination-rect)))
-
-(defun make-text-texture (text-string &key font)
-  (let* ((font-pointer (pointer (or font (make-font))))
-         (surface (sdl2-ttf:render-text-blended font-pointer
-                                                text-string
-                                                255 255 255 0)))
-    (create-texture-from-surface surface)))
