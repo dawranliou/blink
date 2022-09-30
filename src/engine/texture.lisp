@@ -19,5 +19,17 @@
         (sdl2:free-surface surface)))
     tex))
 
+(defmethod load-typed-resource (text-string (type (eql :text))
+                                &key font &allow-other-keys)
+  (let* ((tex (make-instance 'tex))
+         (surface (sdl2-ttf:render-text-blended (pointer font)
+                                                text-string
+                                                255 255 255 0))
+         (texture (create-texture-from-surface surface)))
+    (setf (texture tex) texture
+          (w tex) (sdl2:surface-width surface)
+          (h tex) (sdl2:surface-height surface))
+    tex))
+
 (defmethod free-resource ((tex tex))
   (sdl2:destroy-texture (texture tex)))

@@ -14,6 +14,12 @@
   (loop :for entity :in entities
         :do (render entity :camera camera :w w :h h)))
 
+(defun text (text-string x y &key w h font)
+  (let* ((font (or font (make-font)))
+         (tex (load-resource text-string :type :text :font font))
+         (destination-rect (sdl2:make-rect x y (or w (w tex)) (or h (h tex)))))
+    (render-copy (texture tex) destination-rect)))
+
 (defun create-texture-from-surface (surface)
   (sdl2:create-texture-from-surface *renderer* surface))
 

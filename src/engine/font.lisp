@@ -20,15 +20,3 @@
 (defun make-font (&key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
   (let ((filename (relative-path filename)))
     (load-resource filename :type :font :size size)))
-
-(defun text (text-string x y &key w h font)
-  (let* ((font-pointer (pointer (or font (make-font))))
-         (surface (sdl2-ttf:render-text-blended font-pointer
-                                                text-string
-                                                255 255 255 0))
-         (texture (create-texture-from-surface surface))
-         (destination-rect
-           (sdl2:make-rect x y
-                           (or w (sdl2:texture-width texture))
-                           (or h (sdl2:texture-height texture)))))
-    (render-copy texture destination-rect)))
