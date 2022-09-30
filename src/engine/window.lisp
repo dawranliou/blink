@@ -79,6 +79,9 @@
   (with-slots (renderer resources scene keys keys-prev) window
     (with-renderer renderer
       (with-resource-pool resources
+        (sdl2:set-window-title (kit.sdl2:sdl-window window)
+                               (format nil "FPS ~A" (last-fps scene)))
+
         (when (transp window)
           (update-transition window))
         (sdl2:set-render-draw-color renderer 0 0 0 255)

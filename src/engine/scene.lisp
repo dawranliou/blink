@@ -5,8 +5,10 @@
    (w :accessor w :initarg :w)
    (h :accessor h :initarg :h)
    (entities :accessor entities :initform ())
-   (frames :initform 0 :accessor frames)
    (dt :accessor dt :initform 0)
+   (frames :initform 0 :accessor frames)
+   (frame-timer :accessor frame-timer :initform 1.0)
+   (last-fps :accessor last-fps :initform 0)
    (camera :accessor camera :initarg :camera)
    (pausedp :accessor pausedp :initform nil)
    ;; Quick menu
@@ -36,15 +38,18 @@
 (defmethod update (obj &key &allow-other-keys))
 
 (defmethod update :around ((scene scene) &key keys keys-prev &allow-other-keys)
-  (with-slots (dt frames last-tick-time) scene
-    (incf frames)
-    (when (< 6000 frames)
-      (setf frames 0))
+  (with-slots (dt frames frame-timer last-fps last-tick-time) scene
     (let ((current-tick-time (sdl2:get-ticks)))
       (unless last-tick-time
         (setf last-tick-time current-tick-time))
       (setf dt (- current-tick-time last-tick-time)
-            last-tick-time current-tick-time)))
+            last-tick-time current-tick-time))
+    (incf frames)
+    (incf frame-timer dt)
+    (when (< 1000 frame-timer)
+      (decf frame-timer 1000)
+      (setf last-fps frames
+            frames 0)))
   (when (and (not (gethash "Escape" keys-prev))
              (gethash "Escape" keys))
     (setf (pausedp scene) (not (pausedp scene))))
