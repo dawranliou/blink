@@ -10,6 +10,8 @@
 (defvar *bg-tex* nil)
 (defvar *npc-tex* nil)
 (defvar *objects-tex* nil)
+(defvar *title-font* nil)
+(defvar *subtitle-font* nil)
 
 ;;; Title Scene
 
@@ -23,17 +25,19 @@
 (defun make-title-scene ()
   (make-instance 'title-scene))
 
+(defmethod init ((title-scene title-scene) &key &allow-other-keys)
+  (setf *title-font* (make-font :size 64))
+  (setf *subtitle-font* (make-font :size 24)))
+
 (defmethod update ((title-scene title-scene) &key keys &allow-other-keys)
   (when (gethash "X" keys)
     (transition-to-scene *window* (make-level 'A))))
 
 (defmethod render ((title-scene title-scene) &key)
-  (let ((title-font (make-font :size 64))
-        (small-font (make-font :size 24)))
-    (text "Spirited" 100 200 :font title-font)
-    (text "Act. 2" 100 260 :font title-font)
-    (when (zerop (mod (floor (frames title-scene) 20) 2))
-      (text "Press <X> to start" 100 350 :font small-font))))
+  (text "Spirited" 100 200 :font *title-font*)
+  (text "Act. 2" 100 260 :font *subtitle-font*)
+  (when (zerop (mod (floor (frames title-scene) 20) 2))
+    (text "Press <X> to start" 100 350)))
 
 ;;; End Scene
 (defclass end-scene (scene)

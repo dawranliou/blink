@@ -21,18 +21,20 @@
         (trans-to-scene game-window) scene
         (trans-fade-out-p game-window) nil))
 
-(defmethod kit.sdl2:initialize-window progn
+(defmethod initialize-instance :after
     ((window game-window) &key init-scene &allow-other-keys)
   (sdl2-ttf:init)
   (setf (kit.sdl2:idle-render window) t)
   (sdl2:set-hint :render-scale-quality nil)
-  (with-slots (renderer scene kit.sdl2:sdl-window) window
+  (with-slots (renderer scene resources kit.sdl2:sdl-window) window
     (setf renderer (sdl2:create-renderer kit.sdl2:sdl-window
                                          nil
                                          '(:accelerated
                                            :presentvsync)))
     (sdl2:set-render-draw-blend-mode renderer :blend)
     (setf (scene window) init-scene)
+    (with-resource-pool resources
+      (init init-scene))
     (transition-to-scene window init-scene :alpha 1.0)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
@@ -71,7 +73,7 @@
           (when (< 1.01 trans-alpha)
             (with-resource-pool resources
               (unload scene)
-              (init trans-to-scene :renderer renderer))
+              (init trans-to-scene))
             (setf scene trans-to-scene
                   trans-fade-out-p t))))))
 

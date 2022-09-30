@@ -20,3 +20,11 @@
 (defun make-font (&key (filename "assets/ShareTechMono-Regular.ttf") (size 24))
   (let ((filename (relative-path filename)))
     (load-resource filename :type :font :size size)))
+
+(defvar *default-font* nil)
+
+(defun make-default-font ()
+  (setf *default-font*
+        (or *default-font*
+            (make-font :filename "assets/ShareTechMono-Regular.ttf"
+                       :size 24))))
