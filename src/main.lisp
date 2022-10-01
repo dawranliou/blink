@@ -252,30 +252,3 @@
 (defun main ()
   (sdl2:make-this-thread-main
    (lambda () (run))))
-
-#|
-(add-tiles-to-scene (scene *window*) +room-a+)
-(remove-entity-from-scene *scene* *player*)
-(setf *player-tex* (load-texture-from-file
-                    (renderer *window*)
-                    (relative-path #P"assets/player.png")))
-(prog1 (setf *player* (make-player *player-tex*
-                                   (* 4 +sprite-size+)
-                                   (* 10 +sprite-size+)))
-  (add-to-scene (scene *window*) *player*))
-(remove-all-entities-from-scene (scene *window*))
-(setf *debug* t)
-(setf *debug* nil)
-(setf (x *player*) 100 (y *player*) 100)
-(setf (x *player*) 511)
-(incf (x *player*) +sprite-size+)
-(transition-to-scene *window* (make-title-scene))
-(transition-to-scene *window* (make-level 'A))
-(transition-to-scene *window* (make-level 'C))
-(transition-to-scene *window*
-                     (make-level 'B
-                                 :player-x +sprite-size+
-                                 :player-y (* 14 +sprite-size+)))
-(run)
-(setf (kit.sdl2:render-enabled *window*) t)
-|#
