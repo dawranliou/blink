@@ -38,6 +38,7 @@
     (transition-to-scene window init-scene :alpha 1.0)))
 
 (defmethod kit.sdl2:close-window :before ((window game-window))
+  (setf *default-font* nil)
   (with-slots (renderer) window
     (when (and (slot-boundp window 'renderer) renderer)
       (sdl2:destroy-renderer renderer))))
