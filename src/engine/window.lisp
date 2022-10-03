@@ -12,6 +12,7 @@
    (trans-alpha :accessor trans-alpha :initform 0.0)
    (trans-fade-out-p :accessor trans-fade-out-p :initform nil)
    (trans-to-scene :accessor trans-to-scene :initform nil)
+   (mouse-pos :accessor mouse-pos :initform nil)
    (keys-prev :accessor keys-prev :initform (make-hash-table :test 'equal))
    (keys :accessor keys :initform (make-hash-table :test 'equal))))
 
@@ -79,7 +80,8 @@
                   trans-fade-out-p t))))))
 
 (defmethod kit.sdl2:render ((window game-window))
-  (with-slots (renderer resources scene keys keys-prev) window
+  (with-slots (renderer resources scene keys keys-prev mouse-pos)
+      window
     (with-renderer renderer
       (with-resource-pool resources
         (sdl2:set-window-title (kit.sdl2:sdl-window window)
@@ -90,7 +92,9 @@
         (sdl2:set-render-draw-color renderer 0 0 0 255)
         (sdl2:render-clear renderer)
         (unless (transp window)
-          (update scene :keys keys :keys-prev keys-prev))
+          (update scene
+                  :keys keys :keys-prev keys-prev
+                  :mouse-pos mouse-pos))
         (render scene)
         ;; Record current rendering cycle's keys state to the prev key state table
         (loop :for k
@@ -130,3 +134,7 @@
         (case state
           (:keyup (setf (gethash key-name keys) nil))
           (:keydown (setf (gethash key-name keys) t)))))))
+
+(defmethod kit.sdl2:mousemotion-event
+    ((window game-window) ts mask x y xr yr)
+  (setf (mouse-pos window) (list x y)))
