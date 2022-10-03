@@ -160,7 +160,7 @@
   (setf *bg-tex* (load-resource
                   (relative-path #P"assets/bg.png")
                   :type :image))
-  (add-tiles-to-scene level-scene (tiles level-scene)))
+  (add-tiles-to-scene level-scene (tiles level-scene) *bg-tex*))
 
 (defmethod update ((level-scene level-scene) &key keys &allow-other-keys)
   (with-slots (dt tiles) level-scene

@@ -4,9 +4,9 @@
   ((solid :initarg :solid :accessor solid :initform nil)
    (portal :initarg :portal :accessor portal :initform nil)))
 
-(defun make-tile (tile-id x y &key solid portal)
+(defun make-tile (tile-id x y spritesheet &key solid portal)
   (make-instance 'tile
-                 :tex *bg-tex*
+                 :tex spritesheet
                  :rect (sdl2:make-rect (* tile-id 16) 0 16 16)
                  :x x :y y
                  :w +sprite-size+
@@ -17,7 +17,7 @@
 
 ;; (make-tile 2 64 64)
 
-(defun add-tiles-to-scene (scene tiles)
+(defun add-tiles-to-scene (scene tiles spritesheet)
   (loop for row in tiles
         for y = 0 then (incf y +sprite-size+)
         do (loop for tile-id in row
@@ -27,9 +27,9 @@
                             (= 0 tile-id))
                        nil)
                       ((symbolp tile-id)
-                       (add-to-scene scene (make-tile 0 x y :portal tile-id)))
+                       (add-to-scene scene (make-tile 0 x y spritesheet :portal tile-id)))
                       (t
-                       (add-to-scene scene (make-tile tile-id x y :solid t)))))))
+                       (add-to-scene scene (make-tile tile-id x y spritesheet :solid t)))))))
 
 ;; (load-room *room*)
 ;; (remove-all-entities-from-scene (scene *window*))
