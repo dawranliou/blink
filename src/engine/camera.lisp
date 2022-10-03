@@ -64,3 +64,13 @@
 (defun lerp (a b c)
   (+ (* (- 1 c) a)
      (*      c  b)))
+
+(defun world->screen (pos camera)
+  (destructuring-bind (x y) pos
+    (list (- x (x camera))
+          (- y (y camera)))))
+
+(defun screen->world (pos camera)
+  (destructuring-bind (x y) pos
+    (list (- (x camera) x)
+          (- (y camera) y))))
