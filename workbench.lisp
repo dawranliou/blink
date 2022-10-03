@@ -6,6 +6,7 @@
 
 ;; Resume sdl2 idle rendering loop
 (setf (kit.sdl2:render-enabled *window*) t)
+(setf (kit.sdl2:render-enabled *window*) nil)
 
 ;; Debugging
 (setf *debug-sprite* t)
@@ -31,3 +32,10 @@
                      (make-level 'B
                                  :player-x +sprite-size+
                                  :player-y (* 14 +sprite-size+)))
+
+(transition-to-scene *window*
+                     (make-instance 'level-editor-scene
+                                    :spritesheet (relative-path #P"assets/bg.png")))
+(add-tiles-to-scene (scene *window*)
+                    +room-a+
+                    (spritesheet (scene *window*)))

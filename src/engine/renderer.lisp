@@ -41,3 +41,11 @@
   (when color
     (apply #'sdl2:set-render-draw-color *renderer* color))
   (sdl2:render-fill-rect *renderer* dest-rect))
+
+(defun render-set-viewport (rect)
+  (sdl2:render-set-viewport *renderer* rect))
+
+(defun render-clear (&key color)
+  (when color
+    (apply #'sdl2:set-render-draw-color *renderer* color))
+  (sdl2:render-clear *renderer*))

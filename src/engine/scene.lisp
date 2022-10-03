@@ -101,3 +101,66 @@
     (loop :for menu-item :in (pause-menu-items scene)
           :for y = 150 :then (incf y 50)
           :do (text menu-item 150 y))))
+
+;;; Level editor
+(defclass level-editor-scene (scene)
+  ((spritesheet :initarg :spritesheet :accessor spritesheet)
+   (tiles :initarg :level :accessor tiles)
+   (current-tile :initform 0 :accessor current-tile)
+   (draw-grid-p :initform t :accessor draw-grid-p)
+   (mouse :accessor mouse))
+  (:default-initargs
+   :w +width+
+   :h +height+))
+
+(defmethod init ((scene level-editor-scene) &key)
+  (setf (camera scene)
+        (make-bounded-camera (* 30 +sprite-size+)
+                             (* 30 +sprite-size+)
+                             +width+
+                             +height+))
+  (with-slots (spritesheet) scene
+    (unless (typep spritesheet 'tex)
+      (setf spritesheet (load-resource spritesheet :type :image)))))
+
+(defmethod render ((scene level-editor-scene) &key)
+  ;; Left viewport
+  (render-set-viewport (sdl2:make-rect 0 0 +width+ +height+))
+  (run-renderer-system (entities scene)
+                       :camera (camera scene)
+                       :w (w scene)
+                       :h (h scene))
+
+  ;; Right viewport
+  (render-set-viewport (sdl2:make-rect +width+ 0 300 +height+))
+  (render-draw-rect (sdl2:make-rect 0 0 300 +height+) :color +white+)
+
+  (text (format nil "TILE ~A" (current-tile scene)) 0 10)
+  (render-copy (texture (spritesheet scene))
+               (sdl2:make-rect 0 50
+                               (* 2 (w (spritesheet scene)))
+                               (* 2 (h (spritesheet scene)))))
+  (render-draw-rect (sdl2:make-rect (mod (* +sprite-size+ (current-tile scene))
+                                         (* 2 (w (spritesheet scene))))
+                                    (+ 50
+                                       (floor (* +sprite-size+ (current-tile scene))
+                                              (* 2 (h (spritesheet scene)))))
+                                    +sprite-size+
+                                    +sprite-size+)
+                    :color (rgb 255 0 0))
+
+  )
+
+(defmethod update ((scene level-editor-scene) &key keys mouse-pos)
+  (when (gethash "Left" keys)
+    (decf (x (camera scene)) 10))
+  (when (gethash "Right" keys)
+    (incf (x (camera scene)) 10))
+
+  (when (gethash "Up" keys)
+    (decf (y (camera scene)) 10))
+  (when (gethash "Down" keys)
+    (incf (y (camera scene)) 10))
+
+  (setf (mouse scene) mouse-pos)
+  )

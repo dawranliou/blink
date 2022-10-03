@@ -245,6 +245,7 @@
           (make-instance 'game-window
                          :title "Blink!"
                          :w w :h h
+                         :resizable t
                          :init-scene (make-title-scene))))
   (kit.sdl2:start)
   *window*)
